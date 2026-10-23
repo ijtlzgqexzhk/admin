@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+
+<html lang="lo" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta id="viewportMeta" name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STONE SHOP — Admin Panel</title>
+<meta name="description" content="">
+<script>
+/* ===== ຮອງຮັບໂໝດ sandbox (ເຊັ່ນ ເປີດໃນ preview ຂອງແອັບ Claude): ຖ້າ localStorage ໃຊ້ບໍ່ໄດ້ ໃຫ້ໃຊ້ໜ່ວຍຄວາມຈຳແທນ ===== */
+(function(){
+  var ok = false;
+  try{ var k = '__ls_test__'; window.localStorage.setItem(k, '1'); ok = (window.localStorage.getItem(k) === '1'); window.localStorage.removeItem(k); }catch(e){ ok = false; }
+  if(ok) return;
+  var mem = {};
+  var shim = {
+    getItem: function(k){ return Object.prototype.hasOwnProperty.call(mem, k) ? mem[k] : null; },
+    setItem: function(k, v){ mem[k] = String(v); },
+    removeItem: function(k){ delete mem[k]; },
+    clear: function(){ mem = {}; },
+    key: function(i){ return Object.keys(mem)[i] || null; }
+  };
+  Object.defineProperty(shim, 'length', { get: function(){ return Object.keys(mem).length; } });
+  try{ Object.defineProperty(window, 'localStorage', { value: shim, configurable: true }); }catch(e){ try{ window.localStorage = shim; }catch(_){} }
+  window.__memStorage = true;
+})();
+</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>window.Swal||document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.10.8/sweetalert2.all.min.js"><\/script>')</script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script>window.QRCode||document.write('<script src="https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js"><\/script>')</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script>window.firebase||document.write('<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.js"><\/script>')</script>
+<script>window.firebase||document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-app-compat.min.js"><\/script>')</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script>(window.firebase&&firebase.auth)||document.write('<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-auth-compat.js"><\/script>')</script>
+<script>(window.firebase&&firebase.auth)||document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-auth-compat.min.js"><\/script>')</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>(window.firebase&&firebase.firestore)||document.write('<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-firestore-compat.js"><\/script>')</script>
+<script>(window.firebase&&firebase.firestore)||document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-firestore-compat.min.js"><\/script>')</script>
+<script>
+/* ===== ຖ້າໂຫຼດໄລບຣາຣີບໍ່ໄດ້ (ເນັດຊ້າ/ຖືກບລັອກ): ໃຊ້ໂຕແທນ ເພື່ອໃຫ້ເວັບຍັງເປີດໄດ້ ບໍ່ຄ້າງ ===== */
+(function(){
+  window.__libsMissing = window.__libsMissing || [];
+  if(!window.Swal){
+    window.__libsMissing.push('SweetAlert2');
+    var S = {
+      fire:function(o){
+        o = (typeof o==='string') ? {title:o} : (o||{});
+        if(o.toast){ var d=document.createElement('div'); d.style.cssText='position:fixed;top:12px;right:12px;z-index:100000;background:#04202a;color:#E4ECFB;padding:10px 14px;border-radius:10px;font:14px sans-serif;box-shadow:0 4px 20px rgba(0,0,0,.4)'; d.textContent=o.title||''; document.body.appendChild(d); setTimeout(function(){ d.remove(); },2600); return Promise.resolve({isConfirmed:true}); }
+        var tmp=document.createElement('div'); tmp.innerHTML=(o.html||o.text||''); var msg=(o.title?o.title+'\n':'')+(tmp.textContent||'');
+        if(o.input){ var v=prompt(msg,o.inputValue||''); return Promise.resolve({isConfirmed:v!==null,value:v}); }
+        if(o.showCancelButton){ return Promise.resolve({isConfirmed:confirm(msg)}); }
+        alert(msg); return Promise.resolve({isConfirmed:true});
+      },
+      mixin:function(d){ return { fire:function(o){ return S.fire(Object.assign({}, d, (typeof o==='string')?{title:o}:o)); } }; },
+      close:function(){}, showLoading:function(){}, showValidationMessage:function(m){ alert(m); }
+    };
+    window.Swal = S;
+  }
+  if(!window.QRCode){ window.__libsMissing.push('QRCode'); window.QRCode = { toCanvas:function(){ return Promise.resolve(); } }; }
+  if(!(window.firebase && firebase.auth && firebase.firestore)){
+    window.__libsMissing.push('Firebase'); window.__fbOffline = true;
+    var rej=function(){ return Promise.reject({code:'unavailable',message:'Firebase offline'}); };
+    var noop=function(){};
+    var AUTH={ currentUser:null, onAuthStateChanged:function(cb){ setTimeout(function(){ cb(null); },0); return noop; }, signInAnonymously:rej, signInWithEmailAndPassword:rej, createUserWithEmailAndPassword:rej, signOut:function(){ return Promise.resolve(); } };
+    var DB={ collection:function(){ var c={ doc:function(){ return { get:rej,set:rej,update:rej,delete:rej,onSnapshot:function(){ return noop; } }; }, get:rej, add:rej, where:function(){ return c; }, orderBy:function(){ return c; }, limit:function(){ return c; } }; return c; }, runTransaction:rej, batch:function(){ return { set:noop,update:noop,delete:noop,commit:rej }; } };
+    var AF=function(){ return AUTH; }; AF.EmailAuthProvider={ credential:function(){ return {}; } };
+    var FF=function(){ return DB; }; FF.FieldValue={ increment:function(n){ return n; }, serverTimestamp:function(){ return new Date().toISOString(); }, delete:function(){ return null; } };
+    window.firebase={ initializeApp:noop, auth:AF, firestore:FF };
+  }
+})();
+</script>
+<script>
+window.localAvatar=function(seed){ const s=String(seed||'?'); let h=0; for(const c of s) h=(h*31+c.charCodeAt(0))>>>0;
+  const svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="hsl('+(h%360)+',55%,38%)"/><text x="32" y="42" font-size="30" text-anchor="middle" fill="#fff" font-family="sans-serif">'+(s[0]||'?').toUpperCase().replace(/[<>&]/g,'')+'</text></svg>';
+  return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg); };
+</script>
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: { extend: {
+    fontFamily: { display: ['Rajdhani','Noto Sans Lao','sans-serif'], body: ['Inter','Noto Sans Lao','sans-serif'], mono: ['JetBrains Mono','monospace'] },
+    colors: { ink: { 950:'#041a1d',900:'#082b2f',850:'#09363c',800:'#104a51',700:'#176068',600:'#217881',500:'#329ba6' }, mist: { 400:'#7fced6',300:'#aee5eb',200:'#d3f7fb',100:'#ecfcfd' }, plasma: { 400:'#5ae5f2',500:'#2fdbee',600:'#23b7c7' }, ion: { 400:'#68ebf3',500:'#3fe0ef',600:'#29c2d1' }, rarity: { common:'#9CA3AF',rare:'#49d9e8',epic:'#A855F7',legendary:'#F59E0B' } },
+    boxShadow: { glow: '0 0 0 1px rgba(47,219,238,0.35), 0 0 26px -4px rgba(47,219,238,0.55)', ionglow: '0 0 0 1px rgba(63,224,239,0.35), 0 0 26px -4px rgba(63,224,239,0.5)' },
+  }}
+}
+</script>
+<style>
+html { scroll-behavior: smooth; }
+body { font-family: 'Inter','Noto Sans Lao',sans-serif; background:#051b1e; color:#e6f7f9; }
+.font-display { font-family:'Rajdhani','Noto Sans Lao',sans-serif; letter-spacing:.02em; }
+::-webkit-scrollbar{ width:10px; height:10px; }
+::-webkit-scrollbar-track{ background:#051b1e; }
+::-webkit-scrollbar-thumb{ background:#0f535a; border-radius:8px; }
+.clip-corner { clip-path: polygon(0 12px, 12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%); }
+.clip-corner-sm { clip-path: polygon(0 8px, 8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%); }
+.rarity-common { --rc: #9CA3AF; } .rarity-rare { --rc: #49d9e8; } .rarity-epic { --rc: #A855F7; } .rarity-legendary { --rc: #F59E0B; }
+.rarity-border { box-shadow: 0 0 0 1px color-mix(in srgb, var(--rc) 55%, transparent), 0 0 22px -6px var(--rc); }
+.rarity-tag { color: var(--rc); background: color-mix(in srgb, var(--rc) 16%, transparent); border:1px solid color-mix(in srgb, var(--rc) 45%, transparent); }
+.scanline { position:relative; overflow:hidden; }
+.scanline::after{ content:''; position:absolute; left:0; right:0; height:2px; top:-10%; background:linear-gradient(90deg,transparent, rgba(104,235,243,.9), transparent); animation:scan 3.6s linear infinite; opacity:.7; }
+@keyframes scan { 0%{ top:-5%; } 100%{ top:105%; } }
+.grid-fade { background-image: linear-gradient(rgba(44,195,210,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(44,195,210,0.08) 1px, transparent 1px); background-size: 42px 42px; -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 20%, black 40%, transparent 90%); mask-image: radial-gradient(ellipse 70% 60% at 50% 20%, black 40%, transparent 90%); }
+.view { display:none; } .view.active { display:block; }
+.tab-panel{ display:none; } .tab-panel.active{ display:block; }
+.skeleton{ background:linear-gradient(90deg,#072529 25%,#0a393e 37%,#072529 63%); background-size:400% 100%; animation:sk 1.4s ease infinite; }
+@keyframes sk{ 0%{background-position:100% 50%} 100%{background-position:0 50%} }
+@media (max-width: 767px){ body{ padding-bottom:78px; } }
+.stat-card{ background:#072529; border:1px solid #0a393e; border-radius:16px; padding:22px 16px; text-align:center; transition:.2s; }
+.stat-card:hover{ border-color:#E11D2E55; transform:translateY(-2px); }
+.stat-card .stat-ic{ width:56px; height:56px; border-radius:9999px; background:#0a393e; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; font-size:20px; color:#98e0e8; }
+.stat-card .stat-num{ font-family:'Rajdhani','Noto Sans Lao',sans-serif; font-weight:700; font-size:2rem; color:#e6f7f9; line-height:1; }
+.stat-card .stat-lbl{ margin-top:8px; font-size:12.5px; color:#5ccfdb; }
+.activity-row{ display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; background:#072529; border:1px solid #0a393e; }
+.activity-dot{ width:8px; height:8px; border-radius:9999px; background:#45e0f0; flex-shrink:0; box-shadow:0 0 8px #45e0f0; }
+.promo-badge{ display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; }
+.promo-badge .pb-ic{ width:46px; height:46px; border-radius:9999px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center; font-size:16px; }
+#marqueeBar, #marqueeBar2{ overflow:hidden; white-space:nowrap; background:linear-gradient(90deg,#1f9fac,#2abccb); border-bottom:1px solid rgba(255,255,255,0.15); }
+#marqueeBar2{ background:linear-gradient(90deg,#2abccb,#1f9fac); }
+#marqueeBar .marquee-track, #marqueeBar2 .marquee-track{ display:inline-block; padding-left:100%; animation:marquee-scroll 22s linear infinite; }
+#marqueeBar .marquee-track span, #marqueeBar2 .marquee-track span{ display:inline-block; padding:0 2.5rem; font-family:'Rajdhani','Noto Sans Lao',sans-serif; font-weight:600; letter-spacing:.02em; color:#fff; font-size:14px; }
+@keyframes marquee-scroll{ 0%{ transform:translateX(0); } 100%{ transform:translateX(-100%); } }
+.stock-badge{ display:inline-flex; align-items:center; gap:4px; font-size:10px; font-family:'JetBrains Mono',monospace; color:#98e0e8; }
+.stock-badge i{ font-size:10px; }
+.stock-badge.low{ color:#F59E0B; }
+.stock-badge.out{ color:#EF4444; }
+#heroSection.has-hero-banner{ background-size:cover; background-position:center; background-repeat:no-repeat; }
+#heroBannerOverlay{ display:none; }
+#heroBannerOverlay.show{ display:block; background:linear-gradient(180deg, rgba(5,27,30,.55) 0%, rgba(5,27,30,.85) 60%, rgba(5,27,30,.96) 100%); }
+@media (max-width: 640px){
+  #view-admin h2{ font-size:1.05rem; margin-bottom:.75rem; }
+  #view-admin .admincontent p.text-2xl, #view-admin .admincontent .text-3xl{ font-size:1.15rem; }
+  #view-admin .admincontent .text-xs{ font-size:10px; }
+  #view-admin .admincontent input, #view-admin .admincontent select, #view-admin .admincontent textarea{ font-size:13px; padding:.5rem .65rem; }
+  #view-admin .admincontent button{ font-size:12px; }
+  #view-admin .admincontent .p-6{ padding:.85rem; }
+  #view-admin .admincontent .p-5{ padding:.75rem; }
+  #view-admin table{ font-size:11px; }
+  #view-admin table th, #view-admin table td{ padding:.4rem .5rem; }
+  #productFormModal .p-6, #userDetailModal .p-6{ padding:1rem; }
+  #productFormModal label, #userDetailModal label{ font-size:10px; }
+  #productFormModal input, #productFormModal select, #productFormModal textarea{ font-size:13px; padding:.5rem .65rem; }
+  #productFormModal button, #userDetailModal button{ font-size:12px; }
+}
+
+/* Fit whole image + fill empty space with a blurred copy of the same image (no black bars) */
+.img-fit{ position:relative; overflow:hidden; background-color:#051b1e; background-size:cover; background-position:center; isolation:isolate; }
+.img-fit::before{ content:''; position:absolute; inset:-14%; z-index:-1; background-image:inherit; background-size:cover; background-position:center; filter:blur(24px) saturate(1.25) brightness(.75); }
+.img-fit > img.fit-main{ display:block; position:relative; width:100%; height:100%; object-fit:contain; }
+
+/* ===== Red & Black theme extras ===== */
+body{ background-attachment: fixed; }
+::selection{ background:#2cc3d2; color:#fff; }
+::-webkit-scrollbar-thumb{ background:#1c9caa; }
+::-webkit-scrollbar-thumb:hover{ background:#2cc3d2; }
+
+/* ===== Red-black "RGB sweep" style (from reference) ===== */
+body{ background-image: radial-gradient(ellipse 80% 45% at 50% -10%, rgba(44,195,210,.16), transparent 70%), radial-gradient(ellipse 60% 40% at 100% 100%, rgba(31,159,172,.10), transparent 70%); }
+@keyframes rgbSweep{ 0%{ background-position:125% 0; } 100%{ background-position:-25% 0; } }
+@keyframes redPulse{ 0%,100%{ box-shadow:0 0 0 1px rgba(44,195,210,.55), 0 0 18px -6px rgba(44,195,210,.7); } 50%{ box-shadow:0 0 0 1px rgba(84,227,241,.85), 0 0 30px -4px rgba(56,222,239,.95); } }
+/* glossy red buttons */
+body .bg-plasma-500{ background-image:linear-gradient(180deg,#4ae1f0 0%,#2cc3d2 50%,#1c97a4 100%); border:1px solid rgba(130,234,245,.35); box-shadow:inset 0 1px 0 rgba(255,255,255,.4), inset 0 -2px 0 rgba(0,0,0,.25), 0 8px 20px -8px rgba(44,195,210,.85); }
+body .bg-plasma-500:hover, body .hover\:bg-plasma-600:hover{ filter:brightness(1.12); }
+/* header: black -> deep red, glowing red edge */
+body header.sticky{ background:linear-gradient(90deg,rgba(0,0,0,.94),rgba(16,92,101,.9) 50%,rgba(0,0,0,.94)); border-bottom:1px solid rgba(44,195,210,.5); box-shadow:0 8px 26px -12px rgba(44,195,210,.7); }
+/* headings glow */
+h1.font-display, h2.font-display{ text-shadow:0 0 18px rgba(44,195,210,.45); }
+/* stat cards: soft RGB sweep */
+.stat-card{ position:relative; overflow:hidden; isolation:isolate; background:#0f5158; border-color:#0f535a; }
+.stat-card::before{ content:''; position:absolute; inset:0; z-index:-1; opacity:.28; background:linear-gradient(115deg,transparent 20%,#ff1744 32%,#ff9100 40%,#00e676 48%,#13e1ec 56%,#5ad6f2 64%,#d500f9 72%,transparent 84%); background-size:260% 100%; background-repeat:no-repeat; animation:rgbSweep 6s ease-in-out infinite alternate; }
+
+/* ===== Stat tiles (red bar + big red number + faint icon watermark) ===== */
+.stat-tile{ position:relative; overflow:hidden; padding:14px 4px 18px 4px; min-height:118px; background:transparent; }
+.stat-tile .st-head{ display:flex; align-items:center; gap:8px; font-family:'Noto Sans Lao','Rajdhani',sans-serif; font-size:15px; color:#e6f7f9; position:relative; z-index:1; }
+.stat-tile .st-head::before{ content:''; width:4px; height:18px; border-radius:3px; background:#2cc3d2; box-shadow:0 0 10px rgba(44,195,210,.85); flex-shrink:0; }
+.stat-tile .st-head i{ color:#3eccda; font-size:15px; }
+.stat-tile .st-val{ display:flex; align-items:baseline; flex-wrap:wrap; gap:4px 8px; margin-top:10px; position:relative; z-index:1; }
+.stat-tile .st-num{ font-family:'Rajdhani','Noto Sans Lao',sans-serif; font-weight:700; font-size:clamp(2rem,9vw,3.1rem); line-height:1; color:#3eccda; text-shadow:0 0 22px rgba(44,195,210,.45); }
+.stat-tile .st-unit{ font-size:15px; color:#e6f7f9; }
+.stat-tile .st-bg{ position:absolute; right:-8px; bottom:-16px; font-size:92px; color:rgba(44,195,210,.15); z-index:0; pointer-events:none; }
+</style>
+<style>
+/* ===== Deep-blue theme ===== */
+body{ background-image:radial-gradient(1100px 520px at 50% -120px,rgba(47,219,238,.30),transparent 70%),linear-gradient(180deg,#082b2f 0%,#041a1d 60%); background-attachment:fixed; }
+button[onclick="toggleTheme()"]{ display:none !important; }
+::selection{ background:#2fdbee; color:#fff; }
+/* product-card RGB sweep: every card plays the SAME animation at the SAME time */
+.pcard::after{ animation-delay:0s !important; }
+</style>
+<style>
+/* ===== Cyan theme (STONE SHOP): ໂຕໜັງສືເຂັ້ມເທິງປຸ່ມສີຟ້າໃສ ເພື່ອອ່ານງ່າຍ ===== */
+body .bg-plasma-500, body .bg-ion-500, body [class*="from-plasma-500"]{ color:#04303A !important; }
+body .bg-plasma-500 i, body .bg-ion-500 i, body [class*="from-plasma-500"] i{ color:inherit !important; }
+</style>
+</head>
+<body class="font-body antialiased">
+
+
+<style>
+@keyframes tohBob{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-12px); } }
+.toh-bob{ display:inline-block; animation:tohBob 1.1s ease-in-out infinite; }
+</style>
+<div id="loadOverlay" class="fixed inset-0 z-[999] bg-ink-950 flex items-center justify-center">
+  <div class="text-center">
+    <div class="toh-bob font-display font-700 text-5xl tracking-widest text-plasma-500" style="text-shadow:0 0 22px rgba(44,195,210,.55)">STONE</div>
+  </div>
+</div>
+<script>
+/* ===== ກັນໜ້າໂລໂກຄ້າງ + ບອກສາເຫດ: ເຮັດວຽກເອງ ບໍ່ຂຶ້ນກັບໂຄດຫຼັກ ===== */
+(function(){
+  var errs=[];
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function add(m){ if(errs.length<4 && errs.indexOf(m)<0) errs.push(m); }
+  window.addEventListener('error',function(e){
+    try{
+      var t=e.target;
+      if(t && t!==window && (t.src||t.href)){ add('ໂຫຼດບໍ່ໄດ້: '+String(t.src||t.href).replace(/^https?:\/\//,'').split('/').slice(0,2).join('/')); }
+      else add(String(e.message||'error').slice(0,120));
+    }catch(_){}
+  },true);
+  window.__bootErrors=errs;
+  function hide(){ var o=document.getElementById('loadOverlay'); if(!o) return; o.style.transition='opacity .4s'; o.style.opacity='0'; setTimeout(function(){ var x=document.getElementById('loadOverlay'); if(x&&x.parentNode) x.parentNode.removeChild(x); },400); }
+  function banner(){
+    if(window.__appReady) return;
+    var b=document.getElementById('bootBanner');
+    if(!b){ b=document.createElement('div'); b.id='bootBanner'; b.style.cssText='position:fixed;left:10px;right:10px;bottom:10px;z-index:100001;background:#04202a;color:#E4ECFB;border:1px solid #2fdbee;border-radius:12px;padding:12px 14px;font:13px/1.5 sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.5)'; document.body.appendChild(b); }
+    var miss=window.__libsMissing||[];
+    b.innerHTML='<b>⚠ ໂຫຼດເວັບບໍ່ຄົບ</b><br>'+(miss.length?'ໂຫຼດບໍ່ໄດ້: '+esc(miss.join(', '))+'<br>':'')+(errs.length?errs.map(esc).join('<br>')+'<br>':'ເນັດຊ້າ ຫຼື ຖືກບລັອກ — ກຳລັງລໍຖ້າ...<br>')+'<button onclick="location.reload()" style="margin-top:8px;padding:6px 14px;border-radius:8px;background:#2fdbee;color:#04303A;font-weight:700;border:0">ລອງໃໝ່</button>';
+  }
+  window.__bootCheck=banner;
+  setTimeout(function(){ hide(); banner(); }, 7000);
+  setTimeout(banner, 16000);
+})();
+</script>
+<canvas id="snowCanvas" aria-hidden="true" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9990;"></canvas>
+<script>
+/* ===== ຫິມະຕົກ: ເລີ່ມທັນທີ ແລະ ເຮັດວຽກເອງ ບໍ່ຂຶ້ນກັບໂຄດຫຼັກ ===== */
+(function(){
+  const canvas = document.getElementById('snowCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W = 0, H = 0, dpr = 1, flakes = [], t = 0;
+
+  function makeFlake(randomY){
+    const r = Math.random()*2.6 + 0.8;               // radius
+    return {
+      x: Math.random()*W,
+      y: randomY ? Math.random()*H : -10,
+      r: r,
+      vy: r*0.28 + Math.random()*0.7 + 0.35,          // bigger flakes fall faster
+      sway: Math.random()*1.2 + 0.3,
+      phase: Math.random()*Math.PI*2,
+      alpha: Math.random()*0.45 + 0.45
+    };
+  }
+
+  function resize(){
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = W*dpr; canvas.height = H*dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    const target = Math.round(Math.min(W*H/9000, 160)); // scales with screen size
+    while(flakes.length < target) flakes.push(makeFlake(true));
+    if(flakes.length > target) flakes.length = target;
+  }
+
+  function tick(){
+    t += 0.01;
+    ctx.clearRect(0,0,W,H);
+    const wind = Math.sin(t*0.6)*0.35;                 // gentle changing wind
+    for(const f of flakes){
+      f.y += f.vy;
+      f.x += Math.sin(t*2 + f.phase)*f.sway*0.5 + wind;
+      if(f.y > H + 10){ Object.assign(f, makeFlake(false)); }
+      if(f.x > W + 10) f.x = -10; else if(f.x < -10) f.x = W + 10;
+      // soft bluish halo so flakes stay visible on light and dark backgrounds
+      ctx.beginPath();
+      ctx.arc(f.x, f.y, f.r*1.9, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(121,233,244,' + (f.alpha*0.22) + ')';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(f.x, f.y, f.r, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(255,255,255,' + f.alpha + ')';
+      ctx.fill();
+    }
+    (window.requestAnimationFrame||function(fn){ setTimeout(fn,16); })(tick);
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+  (window.requestAnimationFrame||function(fn){ setTimeout(fn,16); })(tick);
+})();
+</script>
+
+
+
+<div id="topStack" class="sticky top-0 z-50">
+<div id="marqueeBar2" class="hidden py-1.5"><div class="marquee-track" id="marqueeTrack2"></div></div>
+<div id="marqueeBar" class="hidden py-1.5"><div class="marquee-track" id="marqueeTrack"></div></div>
+
+
+<header class="sticky top-0 z-50 backdrop-blur-xl bg-ink-950/80 border-b border-ink-700/60">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16 gap-4">
+      <a href="#" onclick="go('admin')" class="flex items-center gap-2 shrink-0">
+        <div class="site-logo-slot w-9 h-9 rounded-lg bg-gradient-to-br from-plasma-500 to-[#4ce2f0] flex items-center justify-center clip-corner-sm overflow-hidden"><i class="fa-solid fa-user-shield text-ink-950 text-sm"></i></div>
+        <span class="site-name-text font-display font-700 text-xl tracking-wide text-mist-100">STONE<span class="text-plasma-400"> SHOP Admin</span></span>
+      </a>
+      <div class="flex-1 max-w-md hidden lg:block" style="display:none"><input id="navSearch" type="text" class="hidden"></div>
+      <div class="flex items-center gap-2">
+        <i id="themeIcon" class="hidden fa-solid fa-moon"></i>
+        <div id="navBalanceChip" class="hidden items-center gap-1 px-3 py-1.5 rounded-full bg-ink-800 border border-ink-600 font-mono text-sm text-ion-400 font-600"><span id="navBalanceValue">0</span> ₭</div>
+        <div id="notifBell" class="relative hidden">
+          <span id="notifDot" class="hidden absolute -top-1 -right-1 w-4 h-4 bg-ion-500 rounded-full text-[10px] flex items-center justify-center text-ink-950 font-bold">0</span>
+          <div id="notifPanel" class="hidden absolute right-0 mt-2 w-80 bg-ink-800 border border-ink-600 rounded-xl shadow-2xl overflow-hidden">
+            <div class="px-4 py-3 border-b border-ink-700 font-display tracking-wide text-mist-200">ການແຈ້ງເຕືອນ</div>
+            <div id="notifList" class="max-h-80 overflow-y-auto divide-y divide-ink-700"></div>
+          </div>
+        </div>
+        <div id="authArea" class="hidden"></div>
+      </div>
+    </div>
+    <div id="mobileMenu" class="hidden"></div>
+  </div>
+</header>
+</div><!-- /topStack -->
+
+
+<main id="app">
+
+<div id="cloudSyncBanner" class="hidden bg-yellow-500/10 border-b border-yellow-500/40 text-yellow-400 text-xs sm:text-sm px-4 py-2 text-center"></div>
+
+
+<section id="view-admin" class="view">
+  <div class="max-w-[1500px] mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-4 lg:gap-6">
+      <aside class="bg-ink-800/60 border border-ink-700 rounded-xl p-3 sm:p-4 h-fit lg:sticky lg:top-20">
+        <div class="flex items-center gap-2 px-2 pb-3 mb-2 border-b border-ink-700"><i class="fa-solid fa-user-shield text-plasma-400"></i><span class="font-display font-600 text-mist-100 text-sm">Admin Panel</span></div>
+        <nav class="grid grid-cols-2 lg:grid-cols-1 gap-1 font-display text-xs sm:text-sm">
+          <button onclick="adminTab('overview')" data-tab="overview" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-gauge w-4"></i> Dashboard</button>
+          <button onclick="adminTab('products')" data-tab="products" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-box w-4"></i> ຈັດການສິນຄ້າ</button>
+          <button onclick="adminTab('users')" data-tab="users" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-users w-4"></i> ຈັດການຜູ້ໃຊ້</button>
+          <button onclick="adminTab('orders')" data-tab="orders" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-cart-shopping w-4"></i> ຈັດການອໍເດີ</button>
+          <button onclick="adminTab('topups')" data-tab="topups" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-receipt w-4"></i> ກວດສະລິບເຕີມເງິນ <span id="topupBadge" class="hidden ml-1 px-1.5 py-0.5 rounded-full bg-red-500 text-white text-[10px] font-mono">0</span></button>
+          <button onclick="adminTab('topuplookup')" data-tab="topuplookup" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-clock-rotate-left w-4"></i> ກວດປະຫວັດເຕີມເງິນ</button>
+          <button onclick="adminTab('wallet')" data-tab="wallet" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-money-bill-transfer w-4"></i> ເຕີມ / ຫັກເງິນ (ດ້ວຍເບີ)</button>
+          <button onclick="adminTab('codes')" data-tab="codes" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-ticket w-4"></i> ໂຄດເຕີມເງິນ</button>
+          <button onclick="adminTab('qrsettings')" data-tab="qrsettings" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-qrcode w-4"></i> ຕັ້ງຄ່າ QR ຊຳລະເງິນ</button>
+          <button onclick="adminTab('bgsettings')" data-tab="bgsettings" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-image w-4"></i> ຕັ້ງຄ່າພື້ນຫຼັງເວັບ</button>
+          <button onclick="adminTab('brandsettings')" data-tab="brandsettings" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-shield-halved w-4"></i> ໂລໂກ ແລະ ຊື່ເວັບ</button>
+          <button onclick="adminTab('herobanner')" data-tab="herobanner" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-panorama w-4"></i> ແບນເນີ Hero</button>
+          <button onclick="adminTab('marqueesettings')" data-tab="marqueesettings" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-bullhorn w-4"></i> ຂໍ້ຄວາມແລ່ນ</button>
+          <button onclick="adminTab('wheel')" data-tab="wheel" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-dharmachakra w-4"></i> ວົງລໍສິນຄ້າ</button>
+          <button onclick="adminTab('fbnotify')" data-tab="fbnotify" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-brands fa-facebook-messenger w-4"></i> ແຈ້ງເຕືອນເຟສບຸກ</button>
+          <button onclick="adminTab('notifications')" data-tab="notifications" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-bell w-4"></i> ຈັດການແຈ້ງເຕືອນ</button>
+          <button onclick="adminTab('agents')" data-tab="agents" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-handshake w-4"></i> ຕົວແທນຂາຍ</button>
+        </nav>
+      </aside>
+      <div>
+        <div id="adm-overview" class="admincontent">
+          <h2 class="font-display font-700 text-2xl text-mist-100 mb-5">ພາບລວມລະບົບ</h2>
+          <div class="grid grid-cols-2 xl:grid-cols-4 gap-x-4 gap-y-3 mb-8">
+            <div class="stat-tile"><div class="st-head"><i class="fa-solid fa-user"></i><span>ຜູ້ໃຊ້ທັງໝົດ</span></div><div class="st-val"><span class="st-num" id="admStatUsers">0</span><span class="st-unit">ຄົນ</span></div><i class="fa-solid fa-user st-bg"></i></div>
+            <div class="stat-tile"><div class="st-head"><i class="fa-solid fa-cube"></i><span>ສິນຄ້າທັງໝົດ</span></div><div class="st-val"><span class="st-num" id="admStatProducts">0</span><span class="st-unit">ລາຍການ</span></div><i class="fa-solid fa-cube st-bg"></i></div>
+            <div class="stat-tile"><div class="st-head"><i class="fa-solid fa-wallet"></i><span>ຍອດເຕີມເງິນ</span></div><div class="st-val"><span class="st-num" id="admStatTopup">0</span><span class="st-unit">₭</span></div><i class="fa-solid fa-wallet st-bg"></i></div>
+            <div class="stat-tile"><div class="st-head"><i class="fa-solid fa-coins"></i><span>ລາຍຮັບລວມ</span></div><div class="st-val"><span class="st-num" id="admStatRevenue">0</span><span class="st-unit">₭</span></div><i class="fa-solid fa-coins st-bg"></i></div>
+          </div>
+          <div class="bg-ink-800/60 border border-ink-700 rounded-xl p-5"><p class="font-display text-mist-100 font-600 mb-4">ອໍເດີຫຼ້າສຸດ</p><div id="admRecentOrders" class="space-y-2 text-sm"></div></div>
+        </div>
+
+
+<div id="adm-agents" class="admincontent hidden">
+  <div class="flex items-center justify-between mb-5">
+    <h2 class="font-display font-700 text-2xl text-mist-100">ຕົວແທນຂາຍ</h2>
+    <button onclick="addAgent()" class="px-4 py-2.5 rounded-lg bg-plasma-500 hover:bg-plasma-600 font-display font-600 text-sm"><i class="fa-solid fa-plus mr-1"></i> ເພີ່ມຕົວແທນ</button>
+  </div>
+  <p class="text-xs text-mist-400 mb-4">ລາຄາທີ່ປັບໃນໜ້າຕົວແທນ ມີຜົນສະເພາະເວັບຂອງຕົວແທນນັ້ນ. ລາຄາຫຼັກຂອງແອດມິນ ແລະ ລູກຄ້າທົ່ວໄປບໍ່ປ່ຽນ.</p>
+  <div id="agentList" class="grid sm:grid-cols-2 xl:grid-cols-3 gap-3"></div>
+</div>
+
+<div id="adm-products" class="admincontent hidden">
+  <div class="flex items-center justify-between mb-5">
+    <h2 class="font-display font-700 text-2xl text-mist-100">ຈັດການສິນຄ້າ</h2>
+    <div class="flex gap-2"><button onclick="openGlobalDiscount()" class="px-4 py-2.5 rounded-lg bg-ink-700 hover:bg-ink-600 font-display font-600 text-sm"><i class="fa-solid fa-percent mr-1"></i> ສ່ວນຫຼຸດທັງຮ້ານ</button>
+    <button onclick="openCategoryManager()" class="px-4 py-2.5 rounded-lg bg-ink-700 hover:bg-ink-600 font-display font-600 text-sm"><i class="fa-solid fa-layer-group mr-1"></i> ຈັດການໝວດໝູ່</button>
+    <button onclick="openProductForm()" class="px-4 py-2.5 rounded-lg bg-plasma-500 hover:bg-plasma-600 font-display font-600 text-sm"><i class="fa-solid fa-plus mr-1"></i> ເພີ່ມສິນຄ້າ</button></div>
+  </div>
+  <div class="bg-ink-800/60 border border-ink-700 rounded-xl overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead><tr class="text-left text-mist-400 font-display uppercase text-xs border-b border-ink-700"><th class="p-3">ID</th><th class="p-3">ຊື່</th><th class="p-3">ໝວດ</th><th class="p-3">ລາຄາ</th><th class="p-3">ສະຕັອກ</th><th class="p-3">ສະຖານະ</th><th class="p-3">ວັນທີ</th><th class="p-3">ຈັດການ</th></tr></thead>
+      <tbody id="admProductTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<div id="adm-users" class="admincontent hidden">
+  <h2 class="font-display font-700 text-2xl text-mist-100 mb-5">ຈັດການຜູ້ໃຊ້</h2>
+  <div class="bg-ink-800/60 border border-ink-700 rounded-xl overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead><tr class="text-left text-mist-400 font-display uppercase text-xs border-b border-ink-700"><th class="p-3">ຊື່ຜູ້ໃຊ້</th><th class="p-3">ອີເມວ</th><th class="p-3">ເບີໂທ</th><th class="p-3">ວັນທີສະໝັກ</th><th class="p-3">ສະຖານະ</th><th class="p-3">ຈັດການ</th></tr></thead>
+      <tbody id="admUserTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<div id="adm-orders" class="admincontent hidden">
+  <h2 class="font-display font-700 text-2xl text-mist-100 mb-5">ຈັດການອໍເດີ</h2>
+  <div class="bg-ink-800/60 border border-ink-700 rounded-xl overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead><tr class="text-left text-mist-400 font-display uppercase text-xs border-b border-ink-700"><th class="p-3">ອໍເດີ ID</th><th class="p-3">ຜູ້ຊື້</th><th class="p-3">ສິນຄ້າ</th><th class="p-3">ຍອດ</th><th class="p-3">ສະຖານະ</th><th class="p-3">ຈັດການ</th></tr></thead>
+      <tbody id="admOrderTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<div id="adm-topups" class="admincontent hidden">
+  <div class="flex items-center justify-between gap-3 mb-2">
+    <h2 class="font-display font-700 text-2xl text-mist-100">ກວດສະລິບເຕີມເງິນ</h2>
+    <button onclick="refreshAdminTopups()" class="px-3 py-2 rounded-lg bg-ink-700 hover:bg-ink-600 text-mist-200 text-xs font-display"><i class="fa-solid fa-rotate mr-1"></i>ໂຫຼດຄືນໃໝ່</button>
+  </div>
+  <p class="text-xs text-mist-400 mb-4">ລູກຄ້າແຈ້ງເຕີມເງິນແລ້ວຈະຂຶ້ນທີ່ນີ້ (ມີຫຼາຍຄົນກົດພ້ອມກັນກໍ່ເຫັນທຸກຄົນ). ກົດ <b class="text-green-400">ຢືນຢັນ</b> ຫຼື <b class="text-red-400">ປະຕິເສດ</b> ແລ້ວລາຍການນັ້ນຈະຫາຍໄປເລີຍ ບໍ່ສະແດງອີກ ຈົນກວ່າຈະມີລູກຄ້າໃໝ່ແຈ້ງເຂົ້າມາ.</p>
+  <div id="admTopupList" class="grid sm:grid-cols-2 xl:grid-cols-3 gap-3"></div>
+</div>
+
+<div id="adm-topuplookup" class="admincontent hidden">
+  <h2 class="font-display font-700 text-2xl text-mist-100 mb-1">ກວດປະຫວັດເຕີມເງິນ</h2>
+  <p class="text-xs text-mist-400 mb-4">ກວດວ່າລູກຄ້າຄົນໃດເຕີມເງິນຈັກຄັ້ງ ພ້ອມເວລາ ວັນ ເດືອນ ປີ. ຄົ້ນຫາດ້ວຍເບີໂທ ຫຼື ຊື່ຜູ້ໃຊ້. ຖ້າເວັ້ນຊ່ອງຄົ້ນຫາໄວ້ ຈະສະຫຼຸບລູກຄ້າທຸກຄົນທີ່ເຕີມໃນວັນທີ່ເລືອກ.</p>
+  <div class="bg-ink-800/60 border border-ink-700 rounded-xl p-4 max-w-2xl">
+    <label class="text-xs text-mist-400 font-display">ເບີໂທ ຫຼື ຊື່ຜູ້ໃຊ້</label>
+    <input id="tlQuery" type="text" placeholder="ເຊັ່ນ 02012345678 ຫຼື john_doe" onkeydown="if(event.key==='Enter')topupLookup(true)" class="w-full mt-1 px-3 py-2 rounded-lg bg-ink-900 border border-ink-600 text-mist-100 text-sm outline-none focus:border-ion-400">
+    <label class="text-xs text-mist-400 font-display block mt-3">ວັນທີ່ກວດ</label>
+    <div class="flex gap-2 mt-1">
+      <input id="tlDate" type="date" class="flex-1 px-3 py-2 rounded-lg bg-ink-900 border border-ink-600 text-mist-100 text-sm outline-none focus:border-ion-400">
+      <button onclick="document.getElementById('tlDate').value='';topupLookup(true)" class="px-3 py-2 rounded-lg bg-ink-700 hover:bg-ink-600 text-mist-200 text-sm font-display">ມື້ນີ້</button>
+    </div>
+    <button onclick="topupLookup(true)" class="w-full mt-3 py-2.5 rounded-lg bg-plasma-500 hover:bg-plasma-600 font-display font-600 text-sm"><i class="fa-solid fa-magnifying-glass mr-1"></i>ກວດສອບ</button>
+  </div>
+  <div id="tlResult" class="mt-5 max-w-3xl"></div>
+</div>
+
+<div id="adm-wallet" class="admincontent hidden">
+  <h2 class="font-display font-700 text-2xl text-mist-100 mb-1">ເຕີມ / ຫັກເງິນ ດ້ວຍເບີໂທ</h2>
+  <p class="text-xs text-mist-400 mb-5">ໃສ່ເບີລູກຄ້າ ແລ້ວກົດຄົ້ນຫາ ຈະເຫັນຍອດເງິນເກົ່າ ກ່ອນເຕີມ ຫຼື ຫັກ (ສະເພາະແອັດມິນ)</p>
+  <div class="bg-ink-800/60 border border-ink-700 rounded-xl p-4 max-w-xl">
+    <label class="text-xs text-mist-400 font-display">ເບີໂທລູກຄ້າ</label>
+    <div class="flex gap-2 mt-1">
+      <input id="walletPhone" type="tel" inputmode="numeric" placeholder="ເຊັ່ນ 02012345678" onkeydown="if(event.key==='Enter')walletSearch()" class="flex-1 px-3 py-2 rounded-lg bg-ink-900 border border-ink-600 text-mist-100 text-sm outline-none focus:border-ion-400">
+      <button onclick="walletSearch()" class="px-4 py-2 rounded-lg bg-ion-500/20 text-ion-400 hover:bg-ion-500/30 text-sm font-display"><i class="fa-solid fa-magnifying-glass mr-1"></i>ຄົ້ນຫາ</button>
+    </div>
+    <div id="walletResult" class="mt-4"></div>
+  </div>
+</div>
+
+<div id="adm-codes" class="admincontent hidden">
+  <div class="flex items-center justify-between gap-3 mb-5">
+    <h2 class="font-display font-700 text-2xl text-mist-100">ໂຄດເຕີມເງິນ</h2>
+    <button onclick="renderAdminCodes()" class="px-3 py-2 rounded-lg bg-ink-700 hover:bg-ink-600 text-mist-200 text-xs font-display"><i class="fa-solid fa-rotate mr-1"></i>ໂຫຼດຄືນໃໝ່</button>
+  </div>
+  <div class="bg-ink-800/60 border border-ink-700 rounded-xl p-5 max-w-lg mb-6">
+    <p class="font-display text-mist-100 font-600 mb-3">ສ້າງໂຄດໃໝ່</p>
+    <label class="text-xs font-display text-mist-400 uppercase">ຈຳນວນເງິນໃນໂຄດ (₭)</label>
+    <input id="codeAmount" type="number" min="1" placeholder="ເຊັ່ນ 10000" class="w-full mt-1 mb-3 px-3 py-2.5 rounded-lg bg-ink-900 border border-ink-600 text-mist-100 text-sm font-mono">
+    <label class="text-xs font-display text-mist-400 uppercase">ຈຳກັດຈຳນວນຄົນທີ່ໃຊ້ໄດ້</label>
+    <input id="codeMaxUses" type="number" min="1" placeholder="ເຊັ່ນ 10 ຄົນ" class="w-full mt-1 mb-4 px-3 py-2.5 rounded-lg bg-ink-900 border border-ink-600 text-mist-100 text-sm font-mono">
+    <button onclick="createRedeemCode()" class="w-full py-2.5 rounded-lg bg-plasma-500 hover:bg-plasma-600 font-display font-600 text-sm"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> ສ້າງໂຄດ (ສຸ່ມອັດຕະໂນມັດ)</button>
+    <p class="text-[11px] text-mist-400 mt-2">ລະບົບຈະສຸ່ມໂຄດໃຫ້ເອງ. ຜູ້ໃຊ້ແຕ່ລະຄົນໃຊ້ໂຄດດຽວກັນໄດ້ພຽງ 1 ຄັ້ງ.</p>
+  </div>
+  <div class="bg-ink-800/60 border border-ink-700 rounded-xl overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead><tr class="text-left text-mist-400 font-display uppercase text-xs border-b border-ink-700"><th class="p-3">ໂຄດ</th><th class="p-3">ຈຳນວນເງິນ</th><th class="p-3">ໃຊ້ແລ້ວ / ຈຳກັດ</th><th class="p-3">ສະຖານະ</th><th class="p-3">ວັນທີສ້າງ</th><th class="p-3">ຈັດການ</th></tr></thead>
+      <tbody id="admCodeTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<div id="adm-qrsettings" class="admincontent hidden">
+  <h2 class="font-display font-700 text-2xl text-mist-100 mb-5">ຕັ້ງຄ່າ QR ຮັບຊຳລະເງິນ</h2>
+  <div class="space-y-6 max-w-lg">
+    <!-- QR upload -->
+    <div class="bg-ink-800/60 border border-ink-700 rounded-xl p-6">
+      <h3 class="font-display font-600 text-mist-100 mb-2">ຮູບ QR Code</h3>
+      <p class="text-sm text-mist-400 mb-4">ອັບໂຫຼດຮູບ QR Code ຂອງແອດມິນ (ເຊັ່ນ BCEL One, LDB, ONEPAY) ເພື່ອໃຫ້ລູກຄ້າສະແກນຊຳລະເງິນ</p>
+      <div id="adminQrPreview" class="w-48 h-48 rounded-lg bg-ink-900 border border-ink-700 flex items-center justify-center text-mist-400 text-sm mb-4">ຍັງບໍ່ມີ QR</div>
+      <input id="adminQrInput" type="file" accept="image/*" class="block w-full text-sm text-mist-300 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-ink-700 file:text-mist-100 hover:file:bg-ink-600">
+      <div class="flex gap-2 mt-4">
+        <button onclick="saveAdminQr()" class="px-5 py-2.5 rounded-lg bg-plasma-500 hover:bg-plasma-600 font-display font-600 text-sm">ບັນທຶກ QR</button>
+        <button onclick="removeAdminQr()" class="px-5 py-2.5 rounded-lg bg-ink-700 hover:bg-ink-600 text-mist-300 font-display font-600 text-sm">ລຶບ QR</button>
+      </div>
+    </div>
+    <!-- QR per amount -->
+    <div class="bg-ink-800/60 border border-ink-700 rounded-xl p-6">
+      <h3 class="font-display font-600 text-mist-100 mb-1">QR ແຍກຕາມຈຳນວນເງິນ</h3>
+      <p class="text-sm text-mist-400 mb-4">ຖ້າອັບໂຫຼດ QR ສຳລັບຈຳນວນໃດ, ລູກຄ້າທີ່ເລືອກຈຳນວນນັ້ນຈະເຫັນ QR ສະເພາະຂອງຈຳນວນນັ້ນ. ຖ້າບໍ່ອັບໂຫຼດ ຈະໃຊ້ QR ຫຼັກ.</p>
+      <div class="space-y-3" id="qrAmountList"></div>
+      <button onclick="renderQrAmountAdmin()" class="mt-4 text-xs text-ion-400 hover:underline"><i class="fa-solid fa-rotate-right mr-1"></i>ໂຫຼດຄືນ</button>
+    </div>
+  </div>
+</div>
+
+<div id="adm-bgsettings" class="admincontent hidden">
+  <h2 class="font-display font-700 text-2xl text-mist-100 mb-5">ຕັ້ງຄ່າພື້ນຫຼັງເວັບ</h2>
+  <div class="bg-ink-800/60 border border-ink-700 rounded-xl p-6 max-w-lg">
+    <p class="text-sm text-mist-400 mb-4">ອັບໂຫຼດຮູບພື້ນຫຼັງເພື່ອນຳໃຊ້ທົ່ວທັງເວັບໄຊ (ຈະເປັນຄື fixed background ຢູ່ດ້ານຫຼັງຂອງທຸກອົງປະກອບ). ຖ້າຕ້ອງການໂພສຮູບແບນເນີໂຄສະນາ (ເຊັ່ນ Free Fire) ໃຫ້ໄປທີ່ໜ້າ "ແບນເນີ Hero" ແທນ.</p>
+    <div id="adminBgPreview" class="w-full h-40 rounded-lg bg-ink-900 border border-ink-700 flex items-center justify-center text-mist-400 text-sm mb-4 bg-cover bg-center">ຍັງບໍ່ມີພື້ນຫຼັງ (ໃຊ້ຄ່າເລີ່ມຕົ້ນ)</div>
+    <input id="adminBgInput" type="file" accept="image/*" class="block w-full text-sm text-mist-300 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-ink-700 file:text-mist-100 hover:file:bg-ink-600">
+    <div class="flex gap-2 mt-4">
+      <button onclick="saveAdminBg()" class="px-5 py-2.5 rounded-lg bg-plasma-500 hover:bg-plasma-600 font-display font-600 text-sm">ບັນທຶກພື້ນຫຼັງ</button>
+      <button onclick="removeAdminBg()" class="px-5 py-2.5 rounded-lg bg-ink-700 hover:bg-ink-600 text-mist-300 font-display font-600 text-sm">ລຶບພື້ນຫຼັງ</button>
+    </div>
+  </div>
+</div>
+
+<div id="adm-brandsettings" class="admincontent hidden">
+  <h2 class="font-display font-700 text-2xl text-mist-100 mb-5">ໂລໂກ ແລະ ຊື່ເວັບ</h2>
+  <div class="bg-ink-800/60 border border-ink-700 rounded-xl p-6 max-w-lg">
+    <p class="text-sm text-mist-400 mb-4">ປ່ຽນໂລໂກ ແລະ ຊື່ຮ້ານທີ່ສະແດງຢູ່ໜ້າເວັບ. ຖ້າບໍ່ອັບໂຫຼດໂລໂກ, ລະບົບຈະໃຊ້ໄອຄອນເລີ່ມຕົ້ນ.</p>
+    <label class="text-xs font-display text-mist-400 uppercase">ໂລໂກເວັບ</label>
+    <div class="flex items-center gap-4 mt-2 mb-4">
+      <div id="adminLogoPreview" class="w-16 h-16 rounded-lg bg-ink-900 border border-ink-700 flex items-center justify-center text-mist-400 overflow-hidden shrink-0"></div>
+      <input id="adminLogoInput" type="file" accept="image/*" class="block w-full text-sm text-mist-300 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-ink-700 file:text-mist-100 hover:file:bg-ink-600">
+    </div>
+    <label class="text-xs font-display text-mist-400 uppercase">ຊື່ຮ້ານ / ຊື່ເວັບ</label>
+    <input id="adminSiteName" type="text" placeholder="STONE SHOP" class="mt-1.5 w-full bg-ink-900 border border-ink-600 rounded-lg px-4 py-2.5 text-mist-100 focus:outline-none focus:ring-2 focus:ring-plasma-500/50">
+    <div class="flex gap-2 mt-5">
+      <button onclick="saveAdminBrand()" class="px-5 py-2.5 rounded-lg bg-plasma-500 hover:bg-plasma-600 font-display font-600 text-sm">ບັນທຶກ</button>
+      <button onclick="resetAdminBrand()" class="px-5 py-2.5 rounded-lg bg-ink-700 hover:bg-ink-600 text-mist-300 font-display font-600 text-sm">ໃຊ້ຄ່າເລີ່ມຕົ້ນ</button>
+    </div>
+  </div>
+</div>
+
+<div id="adm-herobanner" class="admincontent hidden">
+  <h2 class="font-display font-700 text-2xl text-mist-100 mb-5">ແບນເນີ Hero (ໜ້າຫຼັກ)</h2>
+  <div class="bg-ink-800/60 border border-ink-700 rounded-xl p-6 max-w-lg">
+    <p class="text-sm text-mist-400 mb-4">ອັບໂຫຼດຮູບແບນເນີໂຄສະນາ ຮູບນີ້ຈະສະແດງເປັນພື້ນຫຼັງຂອງສ່ວນ Hero ຢູ່ເທິງສຸດຂອງໜ້າຫຼັກ ໂດຍມີເງົາມືດຄຸມ. ແນະນຳຮູບແນວນອນ ຄວາມລະອຽດສູງ.</p>
+    <div id="adminHeroBannerPreview" class="w-full aspect-[16/9] rounded-lg bg-ink-900 border border-ink-700 flex items-center justify-center text-mist-400 text-sm mb-4 bg-cover bg-center overflow-hidden">ຍັງບໍ່ມີແບນເນີ</div>
+    <input id="adminHeroBannerInput" type="file" accept="image/*" class="block w-full text-sm text-mist-300 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-ink-700 file:text-mist-100 hover:file:bg-ink-600">
+    <div class="flex gap-2 mt-4">
+      <button onclick="saveAdminHeroBanner()" class="px-5 py-2.5 rounded-lg bg-plasma-500 hover:bg-plasma-600 font-display font-600 text-sm">ບັນທຶກແບນເນີ</button>
+      <button onclick="removeAdminHeroBanner()" class="px-5 py-2.5 rounded-lg bg-ink-700 hover:bg-ink-600 text-mist-300 font-display font-600 text-sm">ລຶບແບນເນີ</button>
+    </div>
+  </div>
+</div>
+
+<div id="adm-marqueesettings" class="admincontent hidden">
+  <h2 class="font-display font-700 text-2xl text-mist-100 mb-5">ຂໍ້ຄວາມແລ່ນໂປຣໂມຊັນ</h2>
+  <div class="bg-ink-800/60 border border-ink-700 rounded-xl p-6 max-w-lg mb-6">
+    <p class="font-display text-mist-100 font-600 mb-1">ແຖບທີ 1</p>
+    <p class="text-sm text-mist-400 mb-4">ຂໍ້ຄວາມນີ້ຈະແລ່ນຢູ່ເທິງສຸດຂອງທຸກໜ້າ. ປະຫວ່າງໄວ້ຫວ່າງເພື່ອເຊື່ອງແຖບນີ້.</p>
+    <label class="text-xs font-display text-mist-400 uppercase">ຂໍ້ຄວາມໂປຣໂມຊັນ</label>
+    <textarea id="marqueeInput" rows="3" placeholder="ຕົວຢ່າງ: 🔥 ໂປຣໂມຊັນພິເສດ! ເຕີມເງິນຄັ້ງທຳອິດຮັບໂບນັດ 10% — ຕິດຕໍ່ແອດມິນດຽວນີ້!" class="mt-1.5 w-full bg-ink-900 border border-ink-600 rounded-lg px-4 py-2.5 text-mist-100"></textarea>
+    <label class="text-xs font-display text-mist-400 uppercase mt-4 block">ຄວາມໄວ (ວິນາທີຕໍ່ຮອບ — ຕົວເລກຍິ່ງນ້ອຍ ແລ່ນຍິ່ງໄວ)</label>
+    <input id="marqueeSpeedInput" type="number" min="3" max="120" step="1" placeholder="22" class="mt-1.5 w-32 bg-ink-900 border border-ink-600 rounded-lg px-4 py-2.5 text-mist-100">
+    <div class="flex gap-2 mt-4">
+      <button onclick="saveMarquee()" class="px-5 py-2.5 rounded-lg bg-plasma-500 hover:bg-plasma-600 font-display font-600 text-sm">ບັນທຶກ</button>
+      <button onclick="removeMarquee()" class="px-5 py-2.5 rounded-lg bg-ink-700 hover:bg-ink-600 text-mist-300 font-display font-600 text-sm">ລຶບ / ເຊື່ອງແຖບ</button>
+    </div>
+  </div>
+  <div class="bg-ink-800/60 border border-ink-700 rounded-xl p-6 max-w-lg">
+    <p class="font-display text-mist-100 font-600 mb-1">ແຖບທີ 2 (ຢູ່ເທິງສຸດ, ແຍກຕ່າງຫາກຈາກແຖບທີ 1)</p>
+    <p class="text-sm text-mist-400 mb-4">ປະຫວ່າງໄວ້ຫວ່າງເພື່ອເຊື່ອງແຖບນີ້.</p>
+    <label class="text-xs font-display text-mist-400 uppercase">ຂໍ້ຄວາມໂປຣໂມຊັນ (ແຖບທີ 2)</label>
+    <textarea id="marqueeInput2" rows="3" placeholder="ຕົວຢ່າງ: 📢 ຕິດຕໍ່ແອດມິນເພື່ອຮັບໂປຣໂມຊັນພິເສດ!" class="mt-1.5 w-full bg-ink-900 border border-ink-600 rounded-lg px-4 py-2.5 text-mist-100"></textarea>
+    <label class="text-xs font-display text-mist-400 uppercase mt-4 block">ຄວາມໄວ (ວິນາທີຕໍ່ຮອບ — ຕົວເລກຍິ່ງນ້ອຍ ແລ່ນຍິ່ງໄວ)</label>
+    <input id="marqueeSpeedInput2" type="number" min="3" max="120" step="1" placeholder="22" class="mt-1.5 w-32 bg-ink-900 border border-ink-600 rounded-lg px-4 py-2.5 text-mist-100">
+    <div class="flex gap-2 mt-4">
+      <button onclick="saveMarquee2()" class="px-5 py-2.5 rounded-lg bg-plasma-500 hover:bg-plasma-600 font-display font-600 text-sm">ບັນທຶກ</button>
+      <button onclick="removeMarquee2()" class="px-5 py-2.5 rounded-lg bg-ink-700 hover:bg-ink-600 text-mist-300 font-display font-600 text-sm">ລຶບ / ເຊື່ອງແຖບ</button>
+    </div>
+  </div>
+</div>
+
+<div id="adm-wheel" class="admincontent hidden">
+  <h2 class="font-display font-700 text-2xl text-mist-100 mb-5">ວົງລໍສິນຄ້າ</h2>
+  <div class="bg-ink-800/60 border border-ink-700 rounded-xl p-6 max-w-2xl">
+    <label class="flex items-center gap-2 text-mist-100 font-display"><input id="wheelEnabled" type="checkbox" class="w-4 h-4"> ເປີດໃຊ້ວົງລໍໃນໜ້າເວັບ</label>
+    <label class="flex items-center gap-2 text-mist-200 text-sm mt-3"><input id="wheelShowOdds" type="checkbox" class="w-4 h-4"> ສະແດງລາຍການສິນຄ້າ + ເປີເຊັນໃຫ້ລູກຄ້າເຫັນ (ປິດໄວ້ = ລູກຄ້າບໍ່ເຫັນ)</label>
+    <label class="text-xs font-display text-mist-400 uppercase mt-4 block">ລາຄາຫມຸນ 1 ຄັ້ງ (₭)</label>
+    <input id="wheelPrice" type="number" min="1" placeholder="ເຊັ່ນ 5000" class="mt-1.5 w-40 bg-ink-900 border border-ink-600 rounded-lg px-4 py-2.5 text-mist-100">
+    <p class="text-sm text-mist-400 mt-4 mb-2">ເລືອກສິນຄ້າທີ່ຢູ່ໃນວົງລໍ ແລະ ໃສ່ "ນ້ຳໜັກ" (ເລກຍິ່ງຫຼາຍ ໂອກາດຍິ່ງສູງ). ເປີເຊັນທີ່ຄຳນວນໄດ້ສະແດງຢູ່ຂ້າງແຖວ (ລູກຄ້າເຫັນກໍຕໍ່ເມື່ອຕິກ "ສະແດງ" ດ້ານເທິງ). ຕົວເລືອກທີ່ລູກຄ້າໄດ້ຮັບ = ຕົວເລືອກລາຄາຖືກສຸດທີ່ຍັງມີສະຕັອກ.</p>
+    <div id="wheelItems" class="space-y-2"></div>
+    <div class="flex items-center justify-between gap-2 mt-6 mb-2">
+      <p class="text-sm text-mist-400">ຊ່ອງພິເສດ (ບໍ່ມີສິນຄ້າ ເຊັ່ນ ❌ ໂຊກດີຄັ້ງຕໍ່ໄປ) — ສະແດງໃນວົງລໍ ແຕ່ລູກຄ້າບໍ່ໄດ້ສິນຄ້າ</p>
+      <button type="button" onclick="addWheelCustom()" class="shrink-0 px-3 py-1.5 rounded-lg bg-ink-700 hover:bg-ink-600 text-mist-100 text-xs font-display"><i class="fa-solid fa-plus mr-1"></i>ເພີ່ມຊ່ອງ</button>
+    </div>
+    <div id="wheelCustom" class="space-y-2"></div>
+    <button onclick="saveWheelSettings()" class="mt-5 px-5 py-2.5 rounded-lg bg-plasma-500 hover:bg-plasma-600 font-display font-600 text-sm">ບັນທຶກ</button>
+  </div>
+</div>
+<div id="adm-fbnotify" class="admincontent hidden">
+  <h2 class="font-display font-700 text-2xl text-mist-100 mb-5">ແຈ້ງເຕືອນເຟສບຸກ (CallMeBot)</h2>
+  <div class="bg-ink-800/60 border border-ink-700 rounded-xl p-6 max-w-lg">
+    <p class="text-sm text-mist-400 mb-2">ເມື່ອລູກຄ້າແຈ້ງເຕີມເງິນ, ລະບົບຈະສົ່ງຂໍ້ຄວາມແຈ້ງເຕືອນເຂົ້າ Facebook Messenger ຂອງທ່ານໂດຍອັດຕະໂນມັດ (ຜ່ານ CallMeBot) ເຖິງແມ່ນວ່າແອດມິນຈະບໍ່ຢູ່ໜ້າເວັບກໍ່ຕາມ.</p>
+    <p class="text-xs text-mist-400 mb-4">ວິທີເອົາ API Key: ເປີດ Messenger, ຄົ້ນຫາ ແລະ ແຊັດກັບ <b class="text-mist-200">Callmebot</b> → ພິມ <b class="text-mist-200">create apikey</b> → ມັນຈະສົ່ງ API Key ກັບມາ, ຄັດລອກມາໃສ່ຊ່ອງລຸ່ມນີ້.</p>
+    <label class="text-xs font-display text-mist-400 uppercase">CallMeBot API Key</label>
+    <input id="fbApiKeyInput" type="text" placeholder="e.g. P46OrIYtjK7zq6IP" class="mt-1.5 w-full bg-ink-900 border border-ink-600 rounded-lg px-4 py-2.5 text-mist-100 focus:outline-none focus:ring-2 focus:ring-plasma-500/50">
+    <label class="text-xs font-display text-mist-400 uppercase mt-4 block">ລິ້ງໜ້າແອດມິນ (ຈະແປະໃສ່ໃນຂໍ້ຄວາມແຈ້ງເຕືອນ ໃຫ້ແອດມິນກົດໄປກວດ/ອະນຸມັດໄດ້ໄວ)</label>
+    <input id="fbAdminUrlInput" type="text" placeholder="" class="mt-1.5 w-full bg-ink-900 border border-ink-600 rounded-lg px-4 py-2.5 text-mist-100 focus:outline-none focus:ring-2 focus:ring-plasma-500/50">
+    <div class="flex gap-2 mt-4">
+      <button onclick="saveFbNotifySettings()" class="px-5 py-2.5 rounded-lg bg-plasma-500 hover:bg-plasma-600 font-display font-600 text-sm">ບັນທຶກ</button>
+      <button onclick="testFbNotify()" class="px-5 py-2.5 rounded-lg bg-ion-500 hover:bg-ion-600 text-ink-950 font-display font-600 text-sm"><i class="fa-solid fa-paper-plane mr-1"></i>ສົ່ງທົດສອບ</button>
+      <button onclick="removeFbNotifySettings()" class="px-5 py-2.5 rounded-lg bg-ink-700 hover:bg-ink-600 text-mist-300 font-display font-600 text-sm">ລຶບ</button>
+    </div>
+  </div>
+</div>
+
+
+
+<div id="adm-notifications" class="admincontent hidden">
+  <h2 class="font-display font-700 text-2xl text-mist-100 mb-5">ຈັດການແຈ້ງເຕືອນ</h2>
+  <div class="bg-ink-800/60 border border-ink-700 rounded-xl p-5 max-w-xl">
+    <label class="text-xs font-display text-mist-400 uppercase">ຫົວຂໍ້</label>
+    <input id="broadcastTitle" class="mt-1.5 w-full bg-ink-900 border border-ink-600 rounded-lg px-4 py-2.5 text-mist-100">
+    <label class="text-xs font-display text-mist-400 uppercase mt-4 block">ຂໍ້ຄວາມ</label>
+    <textarea id="broadcastMsg" rows="3" class="mt-1.5 w-full bg-ink-900 border border-ink-600 rounded-lg px-4 py-2.5 text-mist-100"></textarea>
+    <button onclick="broadcastNotification()" class="mt-4 px-5 py-2.5 rounded-lg bg-ion-500 hover:bg-ion-600 text-ink-950 font-display font-600"><i class="fa-solid fa-paper-plane mr-1"></i> ສົ່ງໃຫ້ຜູ້ໃຊ້ທັງໝົດ</button>
+  </div>
+</div>
+
+  </div>
+</div>
+
+
+  </div>
+</section>
+
+
+</main>
+
+
+<footer class="border-t border-ink-700/60 mt-10">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+    <div>
+      <div class="flex items-center gap-2 mb-3">
+        <div class="site-logo-slot w-8 h-8 rounded-lg bg-gradient-to-br from-plasma-500 to-[#4ce2f0] flex items-center justify-center clip-corner-sm overflow-hidden"><i class="fa-solid fa-gamepad text-ink-950 text-xs"></i></div>
+        <span class="site-name-text font-display font-700 text-mist-100">STONE<span class="text-plasma-400"> SHOP</span></span>
+      </div>
+    </div>
+    <div><p class="font-display font-600 text-mist-100 mb-3">ຊ່ວຍເຫຼືອ</p><ul class="space-y-2 text-sm text-mist-400">
+      <li><a href="https://www.facebook.com/share/1AiS3JE1CA/" target="_blank" rel="noopener" class="hover:text-plasma-400 text-left"><i class="fa-brands fa-facebook mr-1.5"></i>Facebook: ທັກຫາແອດມິນ</a></li>
+      <li><a href="https://line.me/ti/p/Z2s542SbMU" target="_blank" rel="noopener" class="hover:text-green-400 text-left"><i class="fa-brands fa-line mr-1.5"></i>LINE: ທັກຫາແອດມິນ</a></li>
+      
+    </ul></div>
+    <div><p class="font-display font-600 text-mist-100 mb-3"></p>
+      <div class="flex gap-3 text-mist-400 text-lg"></div>
+    </div>
+  </div>
+  <div class="border-t border-ink-700/60 py-5 text-center text-xs text-mist-400">© 2026 STONE SHOP — ຮ້ານຂາຍພາແນລ Free Fire</div>
+</footer>
+
+
+<div id="imgLightbox" class="hidden fixed inset-0 z-[200] bg-black/90 flex items-center justify-center p-4" onclick="closeImgLightbox()">
+  <button onclick="closeImgLightbox()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-ink-800 border border-ink-600 text-mist-100 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+  <img id="imgLightboxImg" src="" class="max-w-full max-h-full object-contain rounded-lg" onclick="event.stopPropagation()">
+</div>
+
+
+<div id="userDetailModal" class="hidden fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="bg-ink-850 border border-ink-700 rounded-2xl max-w-2xl w-full max-h-[88vh] overflow-y-auto clip-corner">
+    <div id="userDetailModalBody" class="p-6"></div>
+  </div>
+</div>
+
+
+<div id="productFormModal" class="hidden fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="bg-ink-850 border border-ink-700 rounded-2xl max-w-lg w-full max-h-[88vh] overflow-y-auto clip-corner">
+    <div class="p-6">
+      <div class="flex items-center justify-between mb-5">
+        <h3 id="pfTitle" class="font-display font-700 text-xl text-mist-100">ເພີ່ມສິນຄ້າ</h3>
+        <button onclick="closeProductForm()" class="text-mist-400 hover:text-mist-100"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <input type="hidden" id="pfId">
+      <div class="space-y-3">
+        <div><label class="text-xs font-display text-mist-400 uppercase">ຊື່ສິນຄ້າ</label><input id="pfName" class="mt-1 w-full bg-ink-900 border border-ink-600 rounded-lg px-3 py-2 text-mist-100"></div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="text-xs font-display text-mist-400 uppercase">ໝວດໝູ່ <button type="button" onclick="openCategoryManager()" class="ml-1 text-[11px] text-plasma-400 hover:underline normal-case">ຈັດການໝວດ</button></label><select id="pfCategory" class="mt-1 w-full bg-ink-900 border border-ink-600 rounded-lg px-3 py-2 text-mist-100"></select></div>
+          <div><label class="text-xs font-display text-mist-400 uppercase">ລາຄາ (₭)</label><input id="pfPrice" type="number" oninput="updateDiscPreview()" class="mt-1 w-full bg-ink-900 border border-ink-600 rounded-lg px-3 py-2 text-mist-100"></div>
+          <div><label class="text-xs font-display text-mist-400 uppercase">ສ່ວນຫຼຸດ <span class="normal-case text-mist-400">0 = ບໍ່ຫຼຸດ</span></label><div class="mt-1 flex gap-2"><input id="pfDiscount" type="number" min="0" placeholder="ເຊັ່ນ 9" oninput="updateDiscPreview()" class="w-24 bg-ink-900 border border-ink-600 rounded-lg px-3 py-2 text-mist-100"><select id="pfDiscountType" onchange="updateDiscPreview()" class="flex-1 min-w-0 bg-ink-900 border border-ink-600 rounded-lg px-2 py-2 text-mist-100 text-sm"><option value="h">ຮ້ອຍກີບ (9 = ₭900)</option><option value="k">₭ ກີບ</option><option value="pct">% ເປີເຊັນ</option></select></div><p id="pfDiscPreview" class="text-xs text-ion-400 mt-1"></p></div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="text-xs font-display text-mist-400 uppercase">ຄວາມຫາຍາກ</label>
+            <select id="pfRarity" class="mt-1 w-full bg-ink-900 border border-ink-600 rounded-lg px-3 py-2 text-mist-100"><option value="common">Common</option><option value="rare">Rare</option><option value="epic">Epic</option><option value="legendary">Legendary</option></select>
+          </div>
+          <div><label class="text-xs font-display text-mist-400 uppercase">ສະຖານະ</label>
+            <select id="pfStatus" class="mt-1 w-full bg-ink-900 border border-ink-600 rounded-lg px-3 py-2 text-mist-100"><option value="available">ພ້ອມຂາຍ</option><option value="sold">ສິ້ນຄ່າມົດແລ້ວ</option><option value="hidden">ເຊື່ອງ</option></select>
+          </div>
+        </div>
+        <div>
+          <label class="text-xs font-display text-mist-400 uppercase">ຈຳນວນສະຕັອກ (ເຫຼືອຈຳນວນເທົ່າໃດ)</label>
+          <input id="pfStock" type="number" min="0" placeholder="e.g. 5" class="mt-1 w-full bg-ink-900 border border-ink-600 rounded-lg px-3 py-2 text-mist-100">
+          <p class="text-[11px] text-mist-400 mt-1">ຈຳນວນນີ້ຈະສະແດງເປັນ "ເຫຼືອ X ອັນ" ໃຫ້ລູກຄ້າເຫັນ. (ຖ້າທຸກຕົວເລືອກມີລະຫັດສະຕັອກແລ້ວ ລະບົບຈະນັບຈຳນວນລະຫັດໃຫ້ເອງ)</p>
+        </div>
+        <div>
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-display text-mist-400 uppercase">ຕົວເລືອກ: ມື້ / ລາຄາ / ຂໍ້ມູນທີ່ລູກຄ້າໄດ້ຮັບ (ເຊັ່ນ 1ມື້ / 3ມື້ / 7ມື້)</label>
+            <button type="button" onclick="addOptionRow()" class="text-xs text-plasma-400 hover:underline"><i class="fa-solid fa-plus mr-1"></i>ເພີ່ມຕົວເລືອກ</button>
+          </div>
+          <p class="text-[11px] text-mist-400 mt-1 mb-2">ຖ້າເພີ່ມຕົວເລືອກຢ່າງໜ້ອຍ 1 ລາຍການ, ລູກຄ້າຈະຕ້ອງເລືອກກ່ອນຊື້ ແລະ ລາຄາ "ຫຼັກ" ດ້ານເທິງຈະບໍ່ຖືກໃຊ້ (ໃຊ້ລາຄາຂອງແຕ່ລະຕົວເລືອກແທນ). ແຕ່ລະຕົວເລືອກໃສ່ ມື້, ລາຄາ ແລະ ຂໍ້ມູນທີ່ລູກຄ້າຈະໄດ້ຮັບໄດ້ (ຖ້າບໍ່ໃສ່ຂໍ້ມູນຂອງຕົວເລືອກ ຈະໃຊ້ຂໍ້ມູນຫຼັກດ້ານລຸ່ມແທນ). ປະຫວ່າງໄວ້ຖ້າສິນຄ້ານີ້ມີລາຄາດຽວ.</p>
+          <div id="pfOptionsList" class="space-y-2"></div>
+        </div>
+        <div>
+          <label class="text-xs font-display text-mist-400 uppercase">ຮູບສິນຄ້າ (ອັບໂຫຼດຈາກເຄື່ອງ, ເລືອກໄດ້ຫຼາຍຮູບ)</label>
+          <p class="text-[11px] text-mist-400 mt-0.5">ລະບົບຈະຫຍໍ້ຮູບໃຫ້ອັດຕະໂນມັດ ແລະສະແດງເຕັມຮູບ ບໍ່ຕັດຂອບ ສ່ວນທີ່ຫວ່າງຈະເຕີມດ້ວຍພື້ນຫຼັງເບລີຮູບດຽວກັນ</p>
+          <input id="pfImagesFile" type="file" accept="image/*" multiple class="mt-1 block w-full text-sm text-mist-300 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-ink-700 file:text-mist-100 hover:file:bg-ink-600">
+          <div id="pfImagesPreview" class="flex flex-wrap gap-2 mt-2"></div>
+        </div>
+        <div>
+          <label class="text-xs font-display text-mist-400 uppercase">ລິ້ງວິດີໂອ YouTube (ຄລິບທີ່ລູກຄ້າຈະໄດ້ຮັບຫຼັງຈາກຊື້)</label>
+          <div class="relative mt-1">
+            <i class="fa-brands fa-youtube absolute left-3 top-1/2 -translate-y-1/2 text-red-500"></i>
+            <input id="pfVideoUrl" type="url" placeholder="https://youtube.com/watch?v=..." class="w-full bg-ink-900 border border-ink-600 rounded-lg pl-9 pr-3 py-2 text-mist-100 text-sm">
+          </div>
+          <p class="text-[11px] text-mist-400 mt-1">ວາງລິ້ງ YouTube ຂອງວິດີໂອ — ຫຼັງຈາກລູກຄ້າຊື້ ແລະ ໄດ້ຮັບການຢືນຢັນແລ້ວ, ລິ້ງນີ້ຈະສະແດງໃຫ້ລູກຄ້າກົດເປີດເບິ່ງໄດ້ໃນໜ້າ "ເບິ່ງລະຫັດທີຊື້ມາ".</p>
+        </div>
+        <div><label class="text-xs font-display text-mist-400 uppercase">ລາຍລະອຽດ</label><textarea id="pfDesc" rows="3" class="mt-1 w-full bg-ink-900 border border-ink-600 rounded-lg px-3 py-2 text-mist-100"></textarea></div>
+        <div>
+          <label class="text-xs font-display text-mist-400 uppercase">ລະຫັດໄອດີ / ຂໍ້ມູນທີ່ຈະສົ່ງໃຫ້ລູກຄ້າ (Username:Password ຫຼື Key) — ໃຊ້ເມື່ອບໍ່ມີຕົວເລືອກ ຫຼື ຕົວເລືອກບໍ່ມີຂໍ້ມູນຂອງຕົວມັນເອງ</label>
+          <textarea id="pfDeliveryCode" rows="2" placeholder="ຈະສະແດງໃຫ້ລູກຄ້າເຫັນ ຫຼັງຈາກອໍເດີຖືກຢືນຢັນ" class="mt-1 w-full bg-ink-900 border border-ink-600 rounded-lg px-3 py-2 text-mist-100 text-sm font-mono"></textarea>
+        </div>
+        <button onclick="saveProduct()" class="w-full py-2.5 rounded-lg bg-plasma-500 hover:bg-plasma-600 font-display font-600 mt-2">ບັນທຶກສິນຄ້າ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ===== ປ່ຽນໂປຣເຈັກ Firebase: ລ້າງຂໍ້ມູນແຄຊເກົ່າຂອງໂປຣເຈັກກ່ອນໜ້າ (ຄັ້ງດຽວ) ກັນຂໍ້ມູນເກົ່າປົນກັບລະບົບໃໝ່ =====
+(function(){ try{
+  const PID = 'mopbsob';
+  if(localStorage.getItem('vp_fb_project') !== PID){
+    const keep = ['vp_theme','vp_products','vp_settings','vp_admins'];
+    Object.keys(localStorage).filter(k=>k.indexOf('vp_')===0 && keep.indexOf(k)===-1).forEach(k=>localStorage.removeItem(k));
+    localStorage.setItem('vp_fb_project', PID);
+  }
+}catch(e){} })();
+const DB_KEYS = { users:'vp_users', admins:'vp_admins', products:'vp_products', orders:'vp_orders', logs:'vp_logs', session:'vp_session', theme:'vp_theme', settings:'vp_settings', topups:'vp_topups', activeTopups:'vp_active_topups', agents:'vp_agents' };
+// This file is the private admin console — it skips the login screen and
+// signs straight in as the admin account below. If the admin password is
+// ever changed from inside the panel (Settings → Reset Password), update
+// this value to match, or cloud sync (Firestore) will stop working here.
+const ADMIN_BYPASS_PASSWORD = 'TOH02094357757';
+
+// ---- Firebase (Auth + Firestore) ----
+const firebaseConfig = {
+  apiKey: "AIzaSyBZ-6DTp7ssZ4gZYIDQQq_S_V43Vpvzvz8",
+  authDomain: "mopbsob.firebaseapp.com",
+  projectId: "mopbsob",
+  storageBucket: "mopbsob.firebasestorage.app",
+  messagingSenderId: "246745167144",
+  appId: "1:246745167144:web:19eab69c728dec71b4cc1d",
+  measurementId: "G-07VP5C1KW2"
+};
+firebase.initializeApp(firebaseConfig);
+const fbAuth = firebase.auth();
+const fbDb = firebase.firestore();
+// Firebase Auth needs an email, but this app only collects a username,
+// so we map username -> a fake email address under a private domain.
+function usernameToEmail(username){ return String(username).toLowerCase()+'@vaultplay.app'; }
+const _userSynced = new Map();
+async function syncUserToFirestore(user, opts){
+  try{
+    const data = {...user};
+    // FIX: `balance` must NEVER be written from a local cache copy. A stale
+    // cached balance (e.g. the admin's copy from before a customer bought
+    // something) used to overwrite the real balance in Firestore, so the
+    // deduction "disappeared". Balance is only changed via adjustUserBalance().
+    if(!(opts && opts.withBalance)) delete data.balance;
+    await fbDb.collection('users').doc(user.id).set(data, {merge:true});
+  }
+  catch(e){ _userSynced.delete(user.id); console.warn('Firestore sync failed for user', user.id, e); }
+}
+// Atomic balance change done on the server copy (Firestore transaction), then
+// mirrored into the local cache. delta < 0 = deduct, delta > 0 = add.
+// opts.strict: throw 'INSUFFICIENT_BALANCE' instead of clamping at 0.
+// Make sure the Firestore request is sent as the signed-in ADMIN account (not
+// an anonymous / expired session) — otherwise the security rules reject it.
+async function ensureAdminSession(){
+  const cu = fbAuth.currentUser;
+  if(cu && !cu.isAnonymous && _cloudSyncOk) return;
+  const adms = loadDB(DB_KEYS.admins, []);
+  if(adms.length) await ensureAdminFirebaseAuth(adms[0].email, ADMIN_BYPASS_PASSWORD);
+}
+function balanceErrMsg(e){
+  const code = (e && (e.code || e.message)) || 'unknown';
+  if(/permission-denied/.test(code)) return 'ອັບເດດຍອດເງິນບໍ່ສຳເລັດ: Firestore ບໍ່ອະນຸຍາດ (permission-denied) — ກວດ Firestore Rules / ບັນຊີແອດມິນ';
+  if(/unavailable|network/.test(code)) return 'ອັບເດດຍອດເງິນບໍ່ສຳເລັດ: ເຊື່ອມຕໍ່ເນັດ/Firebase ບໍ່ໄດ້ (' + code + ')';
+  return 'ອັບເດດຍອດເງິນບໍ່ສຳເລັດ (' + code + ')';
+}
+async function adjustUserBalance(userId, delta, opts){
+  try{ await ensureAdminSession(); }catch(e){ console.warn('ensureAdminSession failed', e); }
+  const ref = fbDb.collection('users').doc(userId);
+  const newBal = await fbDb.runTransaction(async tx=>{
+    const snap = await tx.get(ref);
+    const cur = (snap.exists && Number(snap.data().balance)) || 0;
+    if(cur + delta < 0 && opts && opts.strict) throw new Error('INSUFFICIENT_BALANCE');
+    const next = Math.max(0, cur + delta);
+    tx.set(ref, { balance: next }, { merge:true });
+    return next;
+  });
+  const us = loadDB(DB_KEYS.users, []);
+  const i = us.findIndex(u=>u.id===userId);
+  if(i>-1){ us[i].balance = newBal; localStorage.setItem(DB_KEYS.users, JSON.stringify(us)); }
+  return newBal;
+}
+// Pulls every user document from Firestore and merges it into the local
+// cache. Used by the admin panel so registrations made on OTHER devices
+// show up here too (plain localStorage only knows about this browser).
+
+// ---- Public stats (visible to guests) ----
+// Guests / non-admin users are not allowed to read the whole `users`
+// collection, so the "total users" number used to show 0 until you registered.
+// Whoever CAN read all users (admin) publishes the real count into one small
+// public doc; everybody else reads that doc, so every visitor sees the same number.
+async function publishPublicStats(count){
+  try{
+    if(!fbAuth.currentUser){ try{ await fbAuth.signInAnonymously(); }catch(e){} }
+    await fbDb.collection('shopData').doc('publicStats').set({ users: Number(count)||0, updatedAt: new Date().toISOString() }, { merge:true });
+  }catch(e){ console.warn('Could not publish public stats', e); }
+}
+async function readPublicUserCount(){
+  try{
+    if(!fbAuth.currentUser){ try{ await fbAuth.signInAnonymously(); }catch(e){} }
+    const d = await fbDb.collection('shopData').doc('publicStats').get();
+    if(d.exists && d.data() && d.data().users != null) return Number(d.data().users)||0;
+  }catch(e){ console.warn('Could not read public stats', e); }
+  return null;
+}
+let _usersSyncOk = false;
+let _usersInFlight = null, _lastUsersAt = 0;
+// PERF: deduped + throttled. Repeated clicks/tabs within 6s reuse the cache
+// instead of re-downloading the whole `users` collection every time.
+function syncAllUsersFromFirestore(force){
+  if(_usersInFlight) return _usersInFlight;
+  if(!force && _usersSyncOk && Date.now() - _lastUsersAt < 6000) return Promise.resolve(loadDB(DB_KEYS.users, []));
+  _usersInFlight = (async()=>{
+    _usersSyncOk = false;
+    try{
+      const snap = await fbDb.collection('users').get();
+      const remoteUsers = snap.docs.map(d=>d.data());
+      _usersSyncOk = true; _lastUsersAt = Date.now();
+      publishPublicStats(remoteUsers.length);
+      const localUsers = loadDB(DB_KEYS.users, []);
+      const merged = [...localUsers];
+      const pos = new Map(merged.map((u,i)=>[u.id,i]));
+      remoteUsers.forEach(ru=>{
+        if(pos.has(ru.id)) merged[pos.get(ru.id)] = {...merged[pos.get(ru.id)], ...ru};
+        else { pos.set(ru.id, merged.length); merged.push(ru); }
+      });
+      localStorage.setItem(DB_KEYS.users, JSON.stringify(merged));
+      return merged;
+    }catch(e){ console.warn('Failed to sync user list from Firestore', e); return loadDB(DB_KEYS.users, []); }
+  })().finally(()=>{ _usersInFlight = null; });
+  return _usersInFlight;
+}
+// Admin login here is a separate local-hash system, not Firebase Auth — but
+// the adminResetPassword Cloud Function needs a real Firebase Auth session
+// to check the admin custom claim. This signs the admin into Firebase Auth
+// too (creating that account the first time), using the same email+password
+// they just used to log in locally.
+let _cloudSyncOk = false;
+async function ensureAdminFirebaseAuth(email, password){
+  try{
+    await fbAuth.signInWithEmailAndPassword(email, password);
+    _cloudSyncOk = true; window._cloudErr = '';
+  }catch(e){ window._cloudErr = (e && (e.code||e.message)) || 'unknown';
+    // Newer Firebase projects have "email enumeration protection" on by
+    // default, which merges the old 'auth/user-not-found' and
+    // 'auth/wrong-password' codes into a single 'auth/invalid-credential'.
+    // The admin account is created lazily on first login, so this code
+    // covers BOTH "account doesn't exist yet" (expected, first run) and
+    // "wrong password" (genuine mismatch) — try creating it; if the account
+    // turns out to already exist, that's the real mismatch case.
+    if(e.code==='auth/user-not-found' || e.code==='auth/invalid-credential'){
+      try{
+        await fbAuth.createUserWithEmailAndPassword(email, password);
+        _cloudSyncOk = true; window._cloudErr = '';
+      }catch(e2){ window._cloudErr = (e2 && (e2.code||e2.message)) || 'unknown';
+        if(e2.code==='auth/email-already-in-use'){
+          console.warn('Admin Firebase Auth password does not match the local admin password — cloud sync will not work until this is fixed.');
+        } else {
+          console.warn('Could not create admin Firebase Auth account', e2);
+        }
+        _cloudSyncOk = false;
+      }
+    } else if(e.code==='auth/wrong-password'){
+      console.warn('Admin Firebase Auth password does not match the local admin password — password reset button may not work until this is fixed.');
+      _cloudSyncOk = false;
+    } else {
+      console.warn('Admin Firebase Auth sign-in failed', e);
+      _cloudSyncOk = false;
+    }
+  }
+  refreshCloudSyncBanner();
+}
+// ຂໍ້ຄວາມບອກສາເຫດທີ່ເຊື່ອມ Firebase ບໍ່ໄດ້ (ໃຫ້ແອດມິນແກ້ໄດ້ເອງ)
+function cloudHint(){
+  const code = String(window._cloudErr || '');
+  const proto = location.protocol;
+  if(proto !== 'https:' && proto !== 'http:') return 'ເປີດໄຟລ໌ຈາກໃນເຄື່ອງ (file/content) ຢູ່ — Firebase ໃຊ້ບໍ່ໄດ້ແບບນີ້. ຕ້ອງເປີດຜ່ານລິ້ງເວັບ https:// (ເຊັ່ນ GitHub Pages)';
+  if(code === 'auth/operation-not-allowed') return 'ຍັງບໍ່ໄດ້ເປີດ Email/Password ໃນ Firebase → Authentication → Sign-in method';
+  if(code === 'auth/network-request-failed') return 'ເນັດບໍ່ຕິດ ຫຼື ເຊື່ອມຕໍ່ Firebase ບໍ່ໄດ້';
+  if(code === 'auth/email-already-in-use' || code === 'auth/wrong-password') return 'ບັນຊີແອດມິນມີໃນ Firebase ແລ້ວ ແຕ່ລະຫັດຜ່ານບໍ່ກົງກັບ ADMIN_BYPASS_PASSWORD ໃນໂຄດ';
+  if(code === 'auth/operation-not-supported-in-this-environment') return 'ບຣາວເຈົ້ານີ້ບໍ່ຮອງຮັບ — ລອງເປີດດ້ວຍ Chrome ຜ່ານລິ້ງ https://';
+  if(code === 'auth/invalid-api-key' || code === 'auth/api-key-not-valid.-please-pass-a-valid-api-key.') return 'API Key ຂອງ Firebase ບໍ່ຖືກຕ້ອງ';
+  if(code === 'auth/too-many-requests') return 'ລອງເຂົ້າຫຼາຍເກີນໄປ ລໍຖ້າສັກຄູ່ແລ້ວລອງໃໝ່';
+  return code ? ('ລະຫັດຂໍ້ຜິດພາດ: ' + code) : 'ກຳລັງເຊື່ອມຕໍ່... ຖ້າຍັງບໍ່ໄດ້ ໃຫ້ກວດເນັດ ແລະ ການຕັ້ງຄ່າ Firebase';
+}
+function refreshCloudSyncBanner(){
+  const el = document.getElementById('cloudSyncBanner');
+  if(!el) return;
+  if(_cloudSyncOk){ el.classList.add('hidden'); return; }
+  el.classList.remove('hidden');
+  el.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1.5"></i><b>ຄລາວບໍ່ໄດ້ເຊື່ອມຕໍ່!</b> ' + escapeHtml(cloudHint());
+}
+
+// ---- Global admin data sync (products, orders, logs, topups, admins, settings) ----
+// Unlike users (synced one doc per user), this is SHOP-WIDE data — one shared
+// doc per key in a single collection, so every device/browser sees the same
+// products, branding, marquee text, orders, etc. that the admin has set.
+const CLOUD_COLLECTION = 'shopData';
+const ADMIN_SYNC_KEYS = ['admins','products','orders','logs','topups','settings','agents'];
+// Tracks Firestore writes that are still in flight. saveDB() fires these
+// without waiting (so the UI stays snappy), but that creates a race: if the
+// admin saves something and then quickly logs out/in or switches tabs
+// (triggering a pull) before the write actually reaches the server — common
+// on a slow/weak signal — the pull would fetch the OLD cloud data and stomp
+// the fresh local save right back to nothing. pullAdminDataFromFirestore
+// waits for any pending write below before it reads, closing that gap.
+const _pendingSyncs = new Map();
+// PERF: coalesce rapid saves of the same key (e.g. product save + log() + order save)
+// into ONE Firestore write of the latest value, instead of one big write per call.
+// SAFE CLOUD WRITE: never overwrite shop data blindly.
+//  - if the cloud copy can't be read, the write is aborted (no blind overwrite)
+//  - a non-admin device can never shrink existing cloud data to empty / <50%
+//  - before any big shrink (or wipe), the previous cloud copy is saved to shopDataBackup/<key>
+async function _guardedCloudSet(key, val){
+  const ref = fbDb.collection(CLOUD_COLLECTION).doc(key);
+  let old = null;
+  try{ const s = await ref.get(); old = s.exists ? (s.data() && s.data().data) : null; }
+  catch(e){ console.warn('Cloud read before write failed, write aborted for', key, e); throw e; }
+  const isEmpty = v => v==null || (Array.isArray(v) ? v.length===0 : (typeof v==='object' && Object.keys(v).length===0));
+  const isAdmin = typeof SESSION !== 'undefined' && SESSION && SESSION.role==='admin';
+  if(old!=null && !isEmpty(old)){
+    const a = JSON.stringify(old).length, b = JSON.stringify(val==null?null:val).length;
+    const shrink = isEmpty(val) || b < a*0.5;
+    if(shrink && !isAdmin){ console.warn('Blocked destructive write from non-admin for', key); return; }
+    if(shrink){ try{ await fbDb.collection('shopDataBackup').doc(key).set({ data: old, savedAt: nowISO() }); }catch(e){ console.warn('backup failed', e); } }
+  }
+  await ref.set({ data: val, updatedAt: nowISO() });
+}
+const _syncQueue = {};
+function syncKeyToFirestore(key, val){
+  let q = _syncQueue[key];
+  if(q){ clearTimeout(q.timer); }
+  else {
+    q = _syncQueue[key] = {};
+    q.promise = new Promise(r=>{ q.resolve = r; });
+    _pendingSyncs.set(key, q.promise);
+    q.run = async ()=>{
+      if(_syncQueue[key] !== q) return;
+      delete _syncQueue[key];
+      clearTimeout(q.timer);
+      try{
+        if(!fbAuth.currentUser){ if(SESSION && SESSION.role==='admin' && typeof toastErr==='function') toastErr('ຍັງບໍ່ໄດ້ເຊື່ອມ Firebase — '+cloudHint()); return; }
+        if(['products','settings','agents'].includes(key) && q.val && typeof q.val==='object'){
+          try{ if(await autoFitImages(q.val, 900000)) localStorage.setItem(DB_KEYS[key], JSON.stringify(q.val)); }catch(e){ console.warn('auto-compress failed', e); }
+        }
+        await _guardedCloudSet(key, q.val);
+        if(['products','settings'].includes(key) && SESSION && SESSION.role==='admin' && typeof toastOk==='function') toastOk('ສົ່ງຂຶ້ນລະບົບລູກຄ້າແລ້ວ ✓');
+      }catch(e){
+        console.warn('Firestore sync failed for', key, e);
+        if(SESSION && SESSION.role==='admin' && typeof toastErr === 'function'){
+          toastErr(`ບໍ່ສາມາດ sync "${key}" ຂຶ້ນຄລາວໄດ້ (ອາດຮູບໃຫຍ່ເກີນໄປ)`);
+        }
+      }finally{
+        if(_pendingSyncs.get(key) === q.promise) _pendingSyncs.delete(key);
+        q.resolve();
+      }
+    };
+  }
+  q.val = val;
+  q.timer = setTimeout(q.run, 250);
+}
+// don't lose queued writes when the tab is hidden / closed
+function _flushSyncQueue(){ Object.keys(_syncQueue).forEach(k=>{ const q=_syncQueue[k]; if(q && q.run) q.run(); }); }
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden) _flushSyncQueue(); });
+window.addEventListener('pagehide', _flushSyncQueue);
+// Pulls every shop-wide doc from Firestore and merges it into the local cache,
+// so changes the admin made on another device/browser show up here too.
+let _pullInFlight = null, _lastPullAt = 0;
+// PERF: deduped + throttled (4s). Returns true if any local data actually changed,
+// so callers only re-render when needed. Pass force=true on money-critical paths.
+function pullAdminDataFromFirestore(force){
+  if(_pullInFlight) return _pullInFlight;
+  if(!force && Date.now() - _lastPullAt < 4000) return Promise.resolve(false);
+  _pullInFlight = (async()=>{
+    if(_pendingSyncs.size) await Promise.all([..._pendingSyncs.values()]);
+    let changed = false;
+    try{
+      const snap = await fbDb.collection(CLOUD_COLLECTION).get();
+      snap.docs.forEach(d=>{
+        const key = d.id;
+        if(!ADMIN_SYNC_KEYS.includes(key)) return;
+        const remote = d.data() && d.data().data;
+        if(remote === undefined || remote === null) return;
+        // cloud copy is the single source of truth (see earlier delete-sticks fix)
+        const s = JSON.stringify(remote);
+        if(localStorage.getItem(DB_KEYS[key]) !== s){ localStorage.setItem(DB_KEYS[key], s); changed = true; }
+      });
+      _lastPullAt = Date.now();
+    }catch(e){ console.warn('Failed to pull admin data from Firestore', e); }
+    return changed;
+  })().finally(()=>{ _pullInFlight = null; });
+  return _pullInFlight;
+}
+
+// Resizes/compresses an uploaded image file before it's turned into a
+// base64 string. Without this, a phone photo (2-8MB) blows past Firestore's
+// 1MB-per-document limit and the settings doc silently fails to sync to the
+// cloud — it still looks fine locally, but never reaches other devices.
+function _loadImgSource(blobOrUrl){
+  return new Promise(async (resolve, reject)=>{
+    try{
+      if(blobOrUrl instanceof Blob && window.createImageBitmap){
+        try{ const bmp = await createImageBitmap(blobOrUrl); return resolve({ el:bmp, w:bmp.width, h:bmp.height }); }catch(e){}
+      }
+      const url = blobOrUrl instanceof Blob ? URL.createObjectURL(blobOrUrl) : blobOrUrl;
+      const img = new Image();
+      img.onload = ()=>resolve({ el:img, w:img.naturalWidth||img.width, h:img.naturalHeight||img.height });
+      img.onerror = ()=>reject(new Error('image decode failed'));
+      img.src = url;
+    }catch(e){ reject(e); }
+  });
+}
+// ===== ບີບອັດຮູບອັດຕະໂນມັດ (ຊັດເຈນກວ່າເກົ່າ) =====
+// - ໃຊ້ WebP ຖ້າບຣາວເຊີຮອງຮັບ (ຄົມກວ່າ JPEG ທີ່ຂະໜາດໄຟລ໌ເທົ່າກັນ), ບໍ່ຮອງຮັບກໍ່ໃຊ້ JPEG
+// - ລຸດຄຸນນະພາບແບບຄ່ອຍໆ ແລະ ຍ່ອຂະໜາດເມື່ອຈຳເປັນເທົ່ານັ້ນ ຈົນໄຟລ໌ຕ່ຳກວ່າ maxBytes
+const _WEBP_OK = (function(){ try{ return document.createElement('canvas').toDataURL('image/webp').indexOf('data:image/webp')===0; }catch(e){ return false; } })();
+function _encodeCanvas(c, q){ return _WEBP_OK ? c.toDataURL('image/webp', q) : c.toDataURL('image/jpeg', q); }
+function _drawScaled(src, w, h){
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+  ctx.fillStyle = '#fff'; ctx.fillRect(0,0,w,h); ctx.drawImage(src.el, 0, 0, w, h);
+  return c;
+}
+function _fitDims(sw, sh, dim){
+  let w = sw, h = sh;
+  if(w > dim || h > dim){ if(w >= h){ h = Math.round(h*dim/w); w = dim; } else { w = Math.round(w*dim/h); h = dim; } }
+  return [w,h];
+}
+async function compressImageFile(file, maxDim, quality, maxBytes){
+  maxBytes = maxBytes || 120*1024;
+  const src = await _loadImgSource(file);
+  let dim = maxDim || 1200, q = quality || 0.86, out = null;
+  for(let i=0;i<12;i++){
+    const [w,h] = _fitDims(src.w, src.h, dim);
+    out = _encodeCanvas(_drawScaled(src, w, h), q);
+    if(out.length*0.75 <= maxBytes) break;
+    if(q > 0.64) q -= 0.06; else dim = Math.round(dim*0.88);
+  }
+  return out;
+}
+// Re-compress an image that is already stored as a data URL
+async function shrinkDataUrl(dataUrl, maxDim, maxBytes){
+  if(!/^data:image/.test(dataUrl)) return dataUrl;
+  const src = await _loadImgSource(dataUrl);
+  let dim = maxDim, q = 0.82, out = dataUrl;
+  for(let i=0;i<12;i++){
+    const [w,h] = _fitDims(src.w, src.h, dim);
+    out = _encodeCanvas(_drawScaled(src, w, h), q);
+    if(out.length*0.75 <= maxBytes) break;
+    if(q > 0.6) q -= 0.06; else dim = Math.round(dim*0.88);
+  }
+  return out.length < dataUrl.length ? out : dataUrl;
+}
+
+// ===== ບີບອັດຮູບອັດຕະໂນມັດ: ຮັກສາແຕ່ລະເອກະສານ Firestore ໃຫ້ຕ່ຳກວ່າ ~900KB =====
+// ບີບຮູບໃຫຍ່ສຸດກ່ອນ, ຄ່ອຍໆຫຼຸດຂະໜາດ ຈົນພໍດີ. ຂ້າມ QR (ບີບແລ້ວສະແກນບໍ່ໄດ້).
+async function autoFitImages(root, limit){
+  limit = limit || 900000;
+  const size = ()=>new Blob([JSON.stringify(root)]).size;
+  if(size() <= limit) return true;
+  const refs = [];
+  (function walk(o, skip){
+    if(!o || typeof o!=='object') return;
+    for(const k of Object.keys(o)){
+      const v = o[k], sk = skip || /qr/i.test(k);
+      if(typeof v==='string'){ if(!sk && /^data:image\/(jpeg|png|webp)/i.test(v) && v.length>6000) refs.push({o,k}); }
+      else if(v && typeof v==='object') walk(v, sk);
+    }
+  })(root, false);
+  const tiers = [[1100,110*1024],[960,90*1024],[800,70*1024],[700,56*1024],[600,44*1024],[520,34*1024],[440,24*1024]];
+  for(const [dim, bytes] of tiers){
+    refs.sort((a,b)=>b.o[b.k].length - a.o[a.k].length);
+    for(const r of refs){
+      if(size() <= limit) return true;
+      if(r.o[r.k].length*0.75 > bytes){ try{ r.o[r.k] = await shrinkDataUrl(r.o[r.k], dim, bytes); }catch(e){} }
+    }
+    if(size() <= limit) return true;
+  }
+  return size() <= 1000000;
+}
+
+function loadDB(key, fallback){
+  try{
+    const v = localStorage.getItem(key);
+    if(!v) return fallback;
+    const p = JSON.parse(v);
+    // ກັນຂໍ້ມູນຜິດປະເພດ (ເຊັ່ນ ຄວນເປັນ array ແຕ່ເປັນ object) ບໍ່ໃຫ້ເວັບຄ້າງ ເຊັ່ນ ".filter is not a function"
+    if(Array.isArray(fallback)) return Array.isArray(p) ? p : fallback;
+    if(fallback && typeof fallback === 'object') return (p && typeof p === 'object' && !Array.isArray(p)) ? p : fallback;
+    return p;
+  }catch(e){ return fallback; }
+}
+function saveDB(key, val){
+  localStorage.setItem(key, JSON.stringify(val));
+  if(key === DB_KEYS.users && Array.isArray(val)){
+    // PERF: only push users that actually changed (was: EVERY user on every save)
+    val.forEach(u=>{
+      if(!(u && u.id)) return;
+      const { balance, ...rest } = u;
+      const s = JSON.stringify(rest);
+      if(_userSynced.get(u.id) === s) return;
+      _userSynced.set(u.id, s);
+      syncUserToFirestore(u);
+    });
+  }
+  const adminKeyName = Object.keys(DB_KEYS).find(k=>DB_KEYS[k]===key && ADMIN_SYNC_KEYS.includes(k));
+  if(adminKeyName) syncKeyToFirestore(adminKeyName, val);
+}
+// ===== ຕິດຕໍ່ແອດມິນ: ກົດແລ້ວເດັ່ງເບີໂທ =====
+const ADMIN_CONTACT = '2092412682';
+function showAdminContact(){
+  Swal.fire({
+    title:'ຕິດຕໍ່ແອດມິນ',
+    html:'<p style="font-size:13px;color:#6ed4df;margin-bottom:14px;">ເລືອກຊ່ອງທາງຕິດຕໍ່</p><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;"><a href="https://www.facebook.com/share/1AiS3JE1CA/" target="_blank" rel="noopener" style="background:#28d2e2;color:#fff;padding:11px 20px;border-radius:8px;font-weight:600;text-decoration:none;font-size:15px;">Facebook</a><a href="https://line.me/ti/p/Z2s542SbMU" target="_blank" rel="noopener" style="background:#06C755;color:#fff;padding:11px 20px;border-radius:8px;font-weight:600;text-decoration:none;font-size:15px;">LINE</a></div>',
+    showConfirmButton:false, showCancelButton:true, cancelButtonText:'ປິດ',
+    background:'#072529', color:'#e6f7f9', cancelButtonColor:'#16808c'
+  });
+}
+// ===== ແຈ້ງເຕືອນ Facebook (CallMeBot) — ໃສ່ API Key ໄວ້ໃຫ້ອັດຕະໂນມັດ =====
+const FB_DEFAULT_KEY = 'QI7dqxaacXg6orsn';
+const FB_OLD_KEYS = ['TBISE7TLIA7FuAqi'];   // ຄີເກົ່າ — ຖືກແທນທີ່ດ້ວຍຄີໃໝ່ອັດຕະໂນມັດ
+function getFbKey(){ try{ const k = String((loadDB(DB_KEYS.settings,{}).fbApiKey)||'').trim(); return (k && !FB_OLD_KEYS.includes(k)) ? k : FB_DEFAULT_KEY; }catch(e){ return FB_DEFAULT_KEY; } }
+function sendFacebookNotify(message){
+  try{
+    const key = getFbKey(); if(!key) return;
+    new Image().src = `https://api.callmebot.com/facebook/send.php?apikey=${encodeURIComponent(key)}&text=${encodeURIComponent(message)}`;
+  }catch(e){}
+}
+function ensureFbKey(){
+  try{ const st = loadDB(DB_KEYS.settings,{}); if(!st.fbApiKey || FB_OLD_KEYS.includes(String(st.fbApiKey).trim())){ st.fbApiKey = FB_DEFAULT_KEY; saveDB(DB_KEYS.settings, st); } }catch(e){}
+}
+setTimeout(ensureFbKey, 4000);
+function uid(prefix){ return prefix + '_' + Math.random().toString(36).slice(2,9) + Date.now().toString(36).slice(-4); }
+function nowISO(){ return new Date().toISOString(); }
+
+// shrink big numbers so they stay on one line inside a stat tile (e.g. 10,000,000 and up)
+function fitStatNum(el){
+  if(!el) return;
+  const n = (el.textContent||'').length;
+  el.style.whiteSpace = 'nowrap';
+  el.style.fontSize = n <= 9 ? '' : (n <= 11 ? 'clamp(1.5rem,6.4vw,2.3rem)' : (n <= 14 ? 'clamp(1.15rem,4.8vw,1.8rem)' : 'clamp(.95rem,3.8vw,1.4rem)'));
+}
+function fmtK(n){ return Number(n||0).toLocaleString('en-US'); }
+function fmtDate(iso){ const d=new Date(iso); return d.toLocaleDateString('lo-LA',{year:'numeric',month:'short',day:'numeric'}); }
+
+function openImgLightbox(src){ document.getElementById('imgLightboxImg').src = src; document.getElementById('imgLightbox').classList.remove('hidden'); }
+function closeImgLightbox(){ document.getElementById('imgLightbox').classList.add('hidden'); document.getElementById('imgLightboxImg').src = ''; }
+
+async function hashPassword(password, salt){
+  const enc = new TextEncoder();
+  const data = enc.encode(salt + ':' + password);
+  const buf = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+function genSalt(){ return uid('salt'); }
+async function verifyPassword(password, salt, hash){ return (await hashPassword(password, salt)) === hash; }
+
+const CATEGORIES = [
+  { id:'ff', name:'Free Fire Panel', icon:'fa-fire' }, { id:'ffmax', name:'Free Fire MAX', icon:'fa-fire-flame-curved' },
+  { id:'mlbb', name:'Mobile Legends', icon:'fa-chess-knight' },
+  { id:'pubg', name:'PUBG Mobile', icon:'fa-gun' },
+  { id:'valorant', name:'Valorant', icon:'fa-crosshairs' },
+];
+
+function getCategories(){ const c = (loadDB(DB_KEYS.settings,{}).categories)||[]; return c.length ? c : CATEGORIES; }
+
+// ================= ຈັດການໝວດໝູ່ (ແອດມິນເພີ່ມ/ແກ້/ລຶບ + ແບນເນີ) =================
+function _catSettings(){ const st = loadDB(DB_KEYS.settings, {}); st.categories = st.categories || []; return st; }
+function openCategoryManager(){
+  let m = document.getElementById('catMgr');
+  if(!m){
+    m = document.createElement('div'); m.id = 'catMgr';
+    m.className = 'fixed inset-0 z-[90] bg-black/70 flex items-start sm:items-center justify-center p-3 overflow-y-auto';
+    m.addEventListener('click', e=>{ if(e.target===m) closeCategoryManager(); });
+    document.body.appendChild(m);
+  }
+  m.classList.remove('hidden'); paintCategoryManager();
+}
+function closeCategoryManager(){
+  const m = document.getElementById('catMgr'); if(m) m.classList.add('hidden');
+  const sel = document.getElementById('pfCategory');
+  if(sel && sel.options){ const cur = sel.value; sel.innerHTML = getCategories().map(c=>`<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}</option>`).join(''); if(cur && Array.from(sel.options).some(o=>o.value===cur)) sel.value = cur; }
+  if(typeof renderAdminProducts==='function') renderAdminProducts();
+}
+function paintCategoryManager(){
+  const m = document.getElementById('catMgr'); if(!m) return;
+  const st = _catSettings(), prods = loadDB(DB_KEYS.products, []);
+  m.innerHTML = `<div class="w-full max-w-xl bg-ink-800 border border-ink-700 rounded-xl p-5 my-4">
+    <div class="flex items-center justify-between mb-4"><h3 class="font-display font-700 text-xl text-mist-100"><i class="fa-solid fa-layer-group mr-2"></i>ຈັດການໝວດໝູ່</h3>
+      <button onclick="closeCategoryManager()" class="text-mist-400 hover:text-mist-100"><i class="fa-solid fa-xmark text-lg"></i></button></div>
+    <p class="text-xs text-mist-400 mb-4">ໝວດໝູ່ຈະສະແດງໃນໜ້າລູກຄ້າເປັນບັດມີແບນເນີ. ລູກຄ້າກົດໝວດໃດ ກໍເຫັນສິນຄ້າໃນໝວດນັ້ນ. ຂະໜາດແບນເນີແນະນຳ ປະມານ 1200×420.</p>
+    <div class="space-y-3 mb-5">${st.categories.map((c,i)=>{
+      const n = prods.filter(p=>p.category===c.id).length;
+      return `<div class="bg-ink-900 border border-ink-700 rounded-lg p-3">
+        <div class="flex items-center gap-3">
+          <div class="w-24 aspect-[666/230] rounded bg-ink-800 bg-cover bg-center shrink-0 flex items-center justify-center text-mist-400" style="${c.image?`background-image:url('${c.image}')`:''}">${c.image?'':'<i class="fa-solid fa-image"></i>'}</div>
+          <div class="flex-1 min-w-0">
+            <input value="${escapeHtml(c.name)}" onchange="renameCategory(${i}, this.value)" class="w-full bg-ink-800 border border-ink-600 rounded-lg px-3 py-1.5 text-mist-100 text-sm">
+            <p class="text-[11px] text-mist-400 mt-1">${n} ສິນຄ້າໃນໝວດນີ້</p></div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 mt-2 text-xs">
+          <label class="cursor-pointer px-2.5 py-1 rounded bg-ink-700 hover:bg-ink-600 text-mist-100"><i class="fa-solid fa-upload mr-1"></i> ປ່ຽນແບນເນີ<input type="file" accept="image/*" class="hidden" onchange="setCategoryImage(${i}, this)"></label>
+          ${c.image?`<button onclick="clearCategoryImage(${i})" class="px-2.5 py-1 rounded bg-ink-700 hover:bg-ink-600 text-mist-100">ລຶບແບນເນີ</button>`:''}
+          <button onclick="moveCategory(${i},-1)" ${i===0?'disabled':''} class="px-2.5 py-1 rounded bg-ink-700 hover:bg-ink-600 text-mist-100 disabled:opacity-30"><i class="fa-solid fa-arrow-up"></i></button>
+          <button onclick="moveCategory(${i},1)" ${i===st.categories.length-1?'disabled':''} class="px-2.5 py-1 rounded bg-ink-700 hover:bg-ink-600 text-mist-100 disabled:opacity-30"><i class="fa-solid fa-arrow-down"></i></button>
+          <button onclick="deleteCategory(${i})" class="ml-auto px-2.5 py-1 rounded bg-red-500/20 hover:bg-red-500/30 text-red-400">ລຶບໝວດ</button>
+        </div></div>`; }).join('') || '<p class="text-center text-mist-400 text-sm py-6">ຍັງບໍ່ມີໝວດໝູ່ — ເພີ່ມດ້ານລຸ່ມ</p>'}</div>
+    <div class="border-t border-ink-700 pt-4">
+      <p class="font-display text-mist-100 font-600 mb-2">ເພີ່ມໝວດໝູ່ໃໝ່</p>
+      <input id="cmName" placeholder="ຊື່ໝວດ ເຊັ່ນ IOS, ANDROID" class="w-full bg-ink-900 border border-ink-600 rounded-lg px-3 py-2 text-mist-100 text-sm mb-2">
+      <input id="cmImg" type="file" accept="image/*" class="block w-full text-sm text-mist-300 mb-3 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-ink-700 file:text-mist-100">
+      <button onclick="addCategory()" class="px-4 py-2 rounded-lg bg-plasma-500 hover:bg-plasma-600 font-display font-600 text-sm"><i class="fa-solid fa-plus mr-1"></i> ເພີ່ມໝວດໝູ່</button>
+    </div></div>`;
+}
+async function addCategory(){
+  const name = (document.getElementById('cmName').value||'').trim();
+  if(!name) return toastErr('ກະລຸນາປ້ອນຊື່ໝວດໝູ່');
+  const f = document.getElementById('cmImg').files[0];
+  let image = null;
+  if(f){ try{ image = await compressImageFile(f, 1000, 0.85, 90*1024); }catch(e){ return toastErr('ບໍ່ສາມາດອ່ານຮູບນີ້ໄດ້'); } }
+  const st = _catSettings(); st.categories.push({ id: uid('cat'), name, image });
+  saveDB(DB_KEYS.settings, st); log('CATEGORY_ADD', 'Added category '+name); toastOk('ເພີ່ມໝວດໝູ່ແລ້ວ'); paintCategoryManager();
+}
+function renameCategory(i, v){
+  const st = _catSettings(); if(!st.categories[i]) return; v = String(v||'').trim(); if(!v) return paintCategoryManager();
+  st.categories[i].name = v; saveDB(DB_KEYS.settings, st); toastOk('ບັນທຶກແລ້ວ');
+}
+async function setCategoryImage(i, input){
+  const f = input.files[0]; if(!f) return;
+  try{ const img = await compressImageFile(f, 1000, 0.85, 90*1024); const st = _catSettings(); if(!st.categories[i]) return; st.categories[i].image = img; saveDB(DB_KEYS.settings, st); toastOk('ບັນທຶກແບນເນີແລ້ວ'); paintCategoryManager(); }
+  catch(e){ toastErr('ບໍ່ສາມາດອ່ານຮູບນີ້ໄດ້'); }
+}
+function clearCategoryImage(i){ const st=_catSettings(); if(!st.categories[i]) return; st.categories[i].image=null; saveDB(DB_KEYS.settings, st); paintCategoryManager(); }
+function moveCategory(i, d){
+  const st=_catSettings(), j=i+d; if(j<0 || j>=st.categories.length) return;
+  [st.categories[i], st.categories[j]] = [st.categories[j], st.categories[i]]; saveDB(DB_KEYS.settings, st); paintCategoryManager();
+}
+function deleteCategory(i){
+  const st=_catSettings(), c=st.categories[i]; if(!c) return;
+  const n = loadDB(DB_KEYS.products, []).filter(p=>p.category===c.id).length;
+  Swal.fire({ title:`ລຶບໝວດ "${c.name}"?`, text: n? `ມີ ${n} ສິນຄ້າໃນໝວດນີ້ — ສິນຄ້າບໍ່ຖືກລຶບ ແຕ່ຈະບໍ່ຢູ່ໃນໝວດໃດ`:'', icon:'warning', showCancelButton:true,
+    confirmButtonText:'ລຶບ', cancelButtonText:'ຍົກເລີກ', background:'#072529', color:'#e6f7f9', confirmButtonColor:'#EF4444', cancelButtonColor:'#16808c'
+  }).then(r=>{ if(!r.isConfirmed) return; const s2=_catSettings(); s2.categories.splice(i,1); saveDB(DB_KEYS.settings, s2); log('CATEGORY_DEL','Deleted category '+c.name); paintCategoryManager(); });
+}
+
+async function seedIfNeeded(){
+  // LOCAL-ONLY seeding: never push empty defaults to Firestore, otherwise a failed
+  // pull on a fresh browser would overwrite the real shop data in the cloud.
+  const seedLocal = (k, v) => { if(!localStorage.getItem(k)) localStorage.setItem(k, JSON.stringify(v)); };
+  let admins = loadDB(DB_KEYS.admins, []);
+  if(admins.length === 0){
+    const salt = genSalt();
+    const hash = await hashPassword('TOH02094357757', salt);
+    admins.push({ id: uid('adm'), email: 'toh94357757@gmail.com', phone: '02094357757', passwordHash: hash, salt: salt, role: 'admin', createdAt: nowISO() });
+    localStorage.setItem(DB_KEYS.admins, JSON.stringify(admins));
+  }
+  seedLocal(DB_KEYS.products, []);
+  seedLocal(DB_KEYS.users, []);
+  seedLocal(DB_KEYS.orders, []);
+  seedLocal(DB_KEYS.logs, []);
+  seedLocal(DB_KEYS.topups, []);
+  seedLocal(DB_KEYS.settings, { qrImage: null, bgImage: null, heroBannerImage: null, siteLogo: null, siteName: '', promoText: '', promoText2: '', fbApiKey: FB_DEFAULT_KEY, adminPanelUrl: '' });
+}
+
+function log(action, detail){
+  const logs = loadDB(DB_KEYS.logs, []);
+  logs.unshift({ id: uid('log'), action, detail, at: nowISO() });
+  saveDB(DB_KEYS.logs, logs.slice(0,500));
+}
+
+const api = {
+  async register({username,password}){
+    const users = loadDB(DB_KEYS.users, []);
+    if(users.some(u=>u.username.toLowerCase()===username.toLowerCase())) throw new Error('ຊື່ຜູ້ໃຊ້ນີ້ຖືກນຳໃຊ້ແລ້ວ');
+    const email = usernameToEmail(username);
+    let cred;
+    try{
+      cred = await fbAuth.createUserWithEmailAndPassword(email, password);
+    }catch(e){
+      if(e.code==='auth/email-already-in-use') throw new Error('ຊື່ຜູ້ໃຊ້ນີ້ຖືກນຳໃຊ້ແລ້ວ');
+      if(e.code==='auth/weak-password') throw new Error('ລະຫັດຜ່ານອ່ອນເກີນໄປ, ກະລຸນາໃຊ້ 6 ໂຕຂຶ້ນໄປ');
+      throw new Error('ສະໝັກສະມາຊິກບໍ່ສຳເລັດ: '+(e.message||e.code));
+    }
+    const user = { id: cred.user.uid, username, email:'', phone:'', verified:false, favorites:[], balance:0, notifications:[
+      { id: uid('ntf'), title:'ຍິນດີຕ້ອນຮັບສູ່ STONE SHOP', message:'ບັນຊີຂອງທ່ານຖືກສ້າງສຳເລັດແລ້ວ.', read:false, at: nowISO() }
+    ], createdAt: nowISO() };
+    users.push(user); saveDB(DB_KEYS.users, users);
+    await syncUserToFirestore(user, {withBalance:true});
+    log('REGISTER', `New user: ${username}`);
+    return { token: 'jwt.'+uid('tok'), user };
+  },
+  async login({id, password}){
+    const email = usernameToEmail(String(id));
+    let cred;
+    try{
+      cred = await fbAuth.signInWithEmailAndPassword(email, password);
+    }catch(e){
+      if(e.code==='auth/user-not-found') throw new Error('ບໍ່ພົບບັນຊີຜູ້ໃຊ້');
+      if(e.code==='auth/wrong-password') throw new Error('ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ');
+      throw new Error('ເຂົ້າສູ່ລະບົບບໍ່ສຳເລັດ: '+(e.message||e.code));
+    }
+    let users = loadDB(DB_KEYS.users, []);
+    let user = users.find(u=> u.id===cred.user.uid);
+    if(!user){
+      // First login on this device/browser: pull the profile down from Firestore.
+      const snap = await fbDb.collection('users').doc(cred.user.uid).get();
+      if(snap.exists){
+        user = snap.data();
+        users.push(user); saveDB(DB_KEYS.users, users);
+      } else {
+        throw new Error('ບໍ່ພົບຂໍ້ມູນຜູ້ໃຊ້ໃນຖານຂໍ້ມູນ');
+      }
+    }
+    log('LOGIN', `User login: ${user.username}`);
+    return { token: 'jwt.'+uid('tok'), refreshToken: 'rft.'+uid('tok'), user };
+  },
+  async adminLogin({id, password}){
+    const admins = loadDB(DB_KEYS.admins, []);
+    const admin = admins.find(a=> a.email.toLowerCase()===String(id).toLowerCase() || a.phone===id);
+    if(!admin) throw new Error('ບໍ່ພົບບັນຊີແອດມິນ');
+    const ok = await verifyPassword(password, admin.salt, admin.passwordHash);
+    if(!ok) throw new Error('ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ');
+    log('ADMIN_LOGIN', `Admin login: ${admin.email}`);
+    return { token:'jwt.'+uid('atok'), admin };
+  },
+  async getProducts(){ return loadDB(DB_KEYS.products, []); },
+  async getProduct(id){ return loadDB(DB_KEYS.products, []).find(p=>p.id===id); }
+};
+
+let SESSION = loadDB(DB_KEYS.session, null);
+
+// Firebase Auth restores a saved session asynchronously — on a fresh page
+// load, fbAuth.currentUser can still be null for a brief moment even for a
+// returning, already-logged-in visitor. Waiting for the first
+// onAuthStateChanged callback (with a safety timeout for a logged-out first
+// visit) means the very first Firestore pull below already carries the
+// right auth state instead of racing ahead of it.
+function waitForAuthReady(timeoutMs){
+  return new Promise(resolve=>{
+    let done = false;
+    const unsub = fbAuth.onAuthStateChanged(user=>{ if(done) return; done = true; unsub(); resolve(user); });
+    setTimeout(()=>{ if(done) return; done = true; try{ unsub(); }catch(e){} resolve(fbAuth.currentUser); }, timeoutMs || 2000);
+  });
+}
+
+// CRITICAL: once a customer is logged in, nothing else in the app ever
+// re-reads their own user document from Firestore again — balance and
+// notification changes an admin makes (approving a top-up or an order)
+// only land in the admin's own local cache unless this runs. Called once
+// right after login/registration, then on a timer, and whenever the wallet
+// tab is opened, so a credited top-up shows up within seconds instead of
+// requiring the customer to clear their browser data.
+async function refreshOwnUserFromFirestore(){
+  if(!SESSION || SESSION.role!=='user') return;
+  try{
+    const snap = await fbDb.collection('users').doc(SESSION.id).get();
+    if(!snap.exists) return;
+    const remote = snap.data();
+    const users = loadDB(DB_KEYS.users, []);
+    const idx = users.findIndex(u=>u.id===SESSION.id);
+    if(idx>-1){ users[idx] = {...users[idx], ...remote}; } else { users.push(remote); }
+    localStorage.setItem(DB_KEYS.users, JSON.stringify(users));
+    renderAuthArea();
+    if(document.getElementById('view-dashboard') && document.getElementById('view-dashboard').classList.contains('active')){
+      const walletTabOpen = document.getElementById('dt-wallet') && !document.getElementById('dt-wallet').classList.contains('hidden');
+      fillDashboard();
+      if(walletTabOpen) renderWallet();
+    }
+  }catch(e){ console.warn('Failed to refresh own user doc from Firestore', e); }
+}
+
+// ===== ກັນໜ້າໂລໂກຄ້າງ: ປິດ loadOverlay ຢ່າງແນ່ນອນ ເຖິງວ່າ Firebase ຊ້າ/ຜິດພາດ =====
+function _hideLoadOverlay(){
+  const o = document.getElementById('loadOverlay'); if(!o) return;
+  o.style.transition='opacity .4s'; o.style.opacity='0';
+  setTimeout(()=>{ const x=document.getElementById('loadOverlay'); if(x) x.remove(); }, 400);
+}
+function _withTimeout(p, ms){ return Promise.race([Promise.resolve(p).catch(e=>{ console.warn(e); }), new Promise(r=>setTimeout(r, ms))]); }
+setTimeout(_hideLoadOverlay, 8000);   // failsafe
+
+
+// ຍ້າຍສິນຄ້າ + ການຕັ້ງຄ່າຈາກແຄຊຂອງແອດມິນ ຂຶ້ນ Firebase ໃໝ່ (ສະເພາະເມື່ອຝັ່ງຄລາວຍັງວ່າງ — ບໍ່ທັບຂໍ້ມູນທີ່ມີຢູ່)
+async function seedCloudFromLocalIfEmpty(){
+  if(!_cloudSyncOk) return;
+  const has = (k,v)=> k==='products' ? (Array.isArray(v) && v.length>0)
+    
