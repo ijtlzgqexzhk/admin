@@ -365,11 +365,17 @@ body .bg-plasma-500 i, body .bg-ion-500 i, body [class*="from-plasma-500"] i{ co
 
 <section id="view-admin" class="view">
   <div class="max-w-[1500px] mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
-    <div class="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-4 lg:gap-6">
+    <div id="adminStatsTop" class="grid grid-cols-2 xl:grid-cols-4 gap-x-4 gap-y-3 mb-5">
+            <div class="stat-tile"><div class="st-head"><i class="fa-solid fa-user"></i><span>ຜູ້ໃຊ້ທັງໝົດ</span></div><div class="st-val"><span class="st-num" id="admStatUsers">0</span><span class="st-unit">ຄົນ</span></div><i class="fa-solid fa-user st-bg"></i></div>
+            <div class="stat-tile"><div class="st-head"><i class="fa-solid fa-cube"></i><span>ສິນຄ້າທັງໝົດ</span></div><div class="st-val"><span class="st-num" id="admStatProducts">0</span><span class="st-unit">ລາຍການ</span></div><i class="fa-solid fa-cube st-bg"></i></div>
+            <div class="stat-tile"><div class="st-head"><i class="fa-solid fa-wallet"></i><span>ຍອດເຕີມເງິນ</span></div><div class="st-val"><span class="st-num" id="admStatTopup">0</span><span class="st-unit">₭</span></div><i class="fa-solid fa-wallet st-bg"></i></div>
+            <div class="stat-tile"><div class="st-head"><i class="fa-solid fa-coins"></i><span>ລາຍຮັບລວມ</span></div><div class="st-val"><span class="st-num" id="admStatRevenue">0</span><span class="st-unit">₭</span></div><i class="fa-solid fa-coins st-bg"></i></div>
+          </div>
+<div id="admRecentOrders" style="display:none"></div>
+<div class="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-4 lg:gap-6">
       <aside class="bg-ink-800/60 border border-ink-700 rounded-xl p-3 sm:p-4 h-fit lg:sticky lg:top-20">
         <div class="flex items-center gap-2 px-2 pb-3 mb-2 border-b border-ink-700"><i class="fa-solid fa-user-shield text-plasma-400"></i><span class="font-display font-600 text-mist-100 text-sm">Admin Panel</span></div>
         <nav class="grid grid-cols-2 lg:grid-cols-1 gap-1 font-display text-xs sm:text-sm">
-          <button onclick="adminTab('overview')" data-tab="overview" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-gauge w-4"></i> Dashboard</button>
           <button onclick="adminTab('products')" data-tab="products" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-box w-4"></i> ຈັດການສິນຄ້າ</button>
           <button onclick="adminTab('users')" data-tab="users" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-users w-4"></i> ຈັດການຜູ້ໃຊ້</button>
           <button onclick="adminTab('orders')" data-tab="orders" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-cart-shopping w-4"></i> ຈັດການອໍເດີ</button>
@@ -394,19 +400,7 @@ body .bg-plasma-500 i, body .bg-ion-500 i, body [class*="from-plasma-500"] i{ co
         </nav>
       </aside>
       <div>
-        <div id="adm-overview" class="admincontent">
-          <h2 class="font-display font-700 text-2xl text-mist-100 mb-5">ພາບລວມລະບົບ</h2>
-          <div class="grid grid-cols-2 xl:grid-cols-4 gap-x-4 gap-y-3 mb-8">
-            <div class="stat-tile"><div class="st-head"><i class="fa-solid fa-user"></i><span>ຜູ້ໃຊ້ທັງໝົດ</span></div><div class="st-val"><span class="st-num" id="admStatUsers">0</span><span class="st-unit">ຄົນ</span></div><i class="fa-solid fa-user st-bg"></i></div>
-            <div class="stat-tile"><div class="st-head"><i class="fa-solid fa-cube"></i><span>ສິນຄ້າທັງໝົດ</span></div><div class="st-val"><span class="st-num" id="admStatProducts">0</span><span class="st-unit">ລາຍການ</span></div><i class="fa-solid fa-cube st-bg"></i></div>
-            <div class="stat-tile"><div class="st-head"><i class="fa-solid fa-wallet"></i><span>ຍອດເຕີມເງິນ</span></div><div class="st-val"><span class="st-num" id="admStatTopup">0</span><span class="st-unit">₭</span></div><i class="fa-solid fa-wallet st-bg"></i></div>
-            <div class="stat-tile"><div class="st-head"><i class="fa-solid fa-coins"></i><span>ລາຍຮັບລວມ</span></div><div class="st-val"><span class="st-num" id="admStatRevenue">0</span><span class="st-unit">₭</span></div><i class="fa-solid fa-coins st-bg"></i></div>
-          </div>
-          <div class="bg-ink-800/60 border border-ink-700 rounded-xl p-5"><p class="font-display text-mist-100 font-600 mb-4">ອໍເດີຫຼ້າສຸດ</p><div id="admRecentOrders" class="space-y-2 text-sm"></div></div>
-        </div>
-
-
-
+        
 
 <div id="adm-products" class="admincontent hidden">
   <div class="flex items-center justify-between mb-5">
@@ -417,7 +411,7 @@ body .bg-plasma-500 i, body .bg-ion-500 i, body [class*="from-plasma-500"] i{ co
   </div>
   <div class="bg-ink-800/60 border border-ink-700 rounded-xl overflow-x-auto">
     <table class="w-full text-sm">
-      <thead><tr class="text-left text-mist-400 font-display uppercase text-xs border-b border-ink-700"><th class="p-3">ID</th><th class="p-3">ຊື່</th><th class="p-3">ໝວດ</th><th class="p-3">ລາຄາ</th><th class="p-3">ສະຕັອກ</th><th class="p-3">ສະຖານະ</th><th class="p-3">ວັນທີ</th><th class="p-3">ຈັດການ</th></tr></thead>
+      <thead><tr class="text-left text-mist-400 font-display uppercase text-xs border-b border-ink-700"><th class="p-3">ຮູບ</th><th class="p-3">ຊື່</th><th class="p-3">ໝວດ</th><th class="p-3">ລາຄາ</th><th class="p-3">ສະຕັອກ</th><th class="p-3">ສະຖານະ</th><th class="p-3">ວັນທີ</th><th class="p-3">ຈັດການ</th></tr></thead>
       <tbody id="admProductTable"></tbody>
     </table>
   </div>
@@ -1647,7 +1641,7 @@ async function seedCloudFromLocalIfEmpty(){
       }
       const changed = await _withTimeout(pullAdminDataFromFirestore(true), 8000);
       startTopupLive(); updateTopupBadge();
-      if(changed){ renderSiteBranding(); applyBackground(); renderMarquee(); fillAdmin(); adminTab(window._curAdminTab || 'overview'); }
+      if(changed){ renderSiteBranding(); applyBackground(); renderMarquee(); fillAdmin(); adminTab(window._curAdminTab || 'products'); }
     }catch(e){ console.warn('background sync failed', e); }
   })();
   window.__appReady = true; try{ var _bb=document.getElementById('bootBanner'); if(_bb) _bb.remove(); }catch(e){}
@@ -1667,7 +1661,7 @@ function go(view, skipHash){
   window.scrollTo({top:0, behavior:'smooth'});
   fillAdmin();
   const _wantTab=(new URLSearchParams(location.search)).get('tab');
-  adminTab(_wantTab || 'overview');
+  adminTab(_wantTab || 'products'); try{ renderAdminOverview(); }catch(e){}
 }
 
 
@@ -2448,7 +2442,7 @@ function _tpNotifyStale(){
     const list = loadDB(DB_KEYS.topups, []).filter(t=>t.status==='pending_verification' && !window._tpNotified.has(t.id) && !_tpIsChecking(t));
     if(!list.length) return;
     list.forEach(t=>window._tpNotified.add(t.id));
-    if(window.deviceNotify) list.slice(0,3).forEach(t=>window.deviceNotify('🔔 ລູກຄ້າແຈ້ງເຕີມເງິນ', (t.username||'-')+' · ₭'+Number(t.amount||0).toLocaleString('en-US')+' · ລໍຖ້າກວດສອບ — ແຕະເພື່ອອະນຸມັດ', 'top_'+t.id, function(){ try{ adminTab('topups'); }catch(e){} }));
+    if(window.deviceNotify) list.slice(0,3).forEach(t=>window.deviceNotify('🔔 ລູກຄ້າແຈ້ງເຕີມເງິນ', (t.username||'-')+' · ₭'+Number(t.amount||0).toLocaleString('en-US')+' · ລໍຖ້າກວດສອບ — ແຕະເພື່ອອະນຸມັດ', 'top_'+t.id, function(){ try{ (window.adminOpenPage||adminTab)('topups'); }catch(e){} }));
     else { toastInfo('🔔 ມີລູກຄ້າແຈ້ງເຕີມເງິນ '+list.length+' ລາຍການ'); _topupBeep(); }
     if(window._curAdminTab === 'topups') renderAdminTopups();
   }catch(e){ console.warn(e); }
@@ -2496,12 +2490,12 @@ function startTopupLive(){
       if(window._curAdminTab === 'topups') renderAdminTopups();
       if(!first && fresh.length){
         if(window.deviceNotify){
-          fresh.slice(0,3).forEach(t=>{ window.deviceNotify('🔔 ລູກຄ້າແຈ້ງເຕີມເງິນ', (t.username||'-')+' · ₭'+Number(t.amount||0).toLocaleString('en-US')+' · ລໍຖ້າກວດສອບ — ແຕະເພື່ອອະນຸມັດ', 'top_'+t.id, function(){ try{ adminTab('topups'); }catch(e){} }); });
+          fresh.slice(0,3).forEach(t=>{ window.deviceNotify('🔔 ລູກຄ້າແຈ້ງເຕີມເງິນ', (t.username||'-')+' · ₭'+Number(t.amount||0).toLocaleString('en-US')+' · ລໍຖ້າກວດສອບ — ແຕະເພື່ອອະນຸມັດ', 'top_'+t.id, function(){ try{ (window.adminOpenPage||adminTab)('topups'); }catch(e){} }); });
         }else{ toastInfo('🔔 ມີລູກຄ້າແຈ້ງເຕີມເງິນໃໝ່ '+fresh.length+' ລາຍການ'); _topupBeep(); }
       }
       if(first){
         const n0 = arr.filter(t=>t.status==='pending_verification').length;
-        if(n0 && window.deviceNotify){ setTimeout(()=>window.deviceNotify('🔔 ມີລາຍການເຕີມເງິນລໍຖ້າອະນຸມັດ', n0+' ລາຍການ — ແຕະເພື່ອກວດສອບ', 'top_pending', function(){ try{ adminTab('topups'); }catch(e){} }), 1500); }
+        if(n0 && window.deviceNotify){ setTimeout(()=>window.deviceNotify('🔔 ມີລາຍການເຕີມເງິນລໍຖ້າອະນຸມັດ', n0+' ລາຍການ — ແຕະເພື່ອກວດສອບ', 'top_pending', function(){ try{ (window.adminOpenPage||adminTab)('topups'); }catch(e){} }), 1500); }
       }
       window._lastPendCount = arr.filter(t=>t.status==='pending_verification').length;
       first = false;
@@ -2519,7 +2513,7 @@ document.addEventListener('visibilitychange', async function(){
     updateTopupBadge();
     if(window._curAdminTab === 'topups') renderAdminTopups();
     if(n > (window._lastPendCount||0) && window.deviceNotify){
-      window.deviceNotify('🔔 ມີລູກຄ້າແຈ້ງເຕີມເງິນ', n+' ລາຍການລໍຖ້າອະນຸມັດ — ແຕະເພື່ອກວດສອບ', 'top_pending', function(){ try{ adminTab('topups'); }catch(e){} });
+      window.deviceNotify('🔔 ມີລູກຄ້າແຈ້ງເຕີມເງິນ', n+' ລາຍການລໍຖ້າອະນຸມັດ — ແຕະເພື່ອກວດສອບ', 'top_pending', function(){ try{ (window.adminOpenPage||adminTab)('topups'); }catch(e){} });
     }
     window._lastPendCount = n;
   }catch(e){ console.warn(e); }
@@ -2762,7 +2756,7 @@ function clearInstallGuide(){
 }
 
 async function adminTab(tab){
-  if(!document.getElementById('adm-'+tab)) tab='overview';
+  if(!document.getElementById('adm-'+tab)) tab='products';
   document.querySelectorAll('.admincontent').forEach(d=>d.classList.add('hidden'));
   document.getElementById('adm-'+tab).classList.remove('hidden');
   document.querySelectorAll('.adminnav').forEach(b=>b.classList.remove('bg-ink-700','text-mist-100'));
@@ -2789,7 +2783,7 @@ async function adminTab(tab){
     if(tab==='fbnotify') refreshFbNotifyInput();
     if(tab==='wheel') renderAdminWheel();
     if(tab==='agents') renderAgents();
-    if(tab==='overview') renderAdminOverview();
+    try{ _paintAdminOverview(loadDB(DB_KEYS.users, [])); }catch(e){}
   };
   paint();   // PERF: show instantly from local cache...
   // ...then fetch the latest from the cloud in the background and repaint only if something changed
@@ -2872,14 +2866,14 @@ function renderAdminProducts(){
     const stockDisplay = (p.stock===undefined||p.stock===null||p.stock==='') ? '-' : p.stock;
     return `
     <tr class="border-b border-ink-800 hover:bg-ink-800/40">
-      <td class="p-3 font-mono text-xs text-mist-400">${p.id.slice(0,10)}</td>
+      <td class="p-3">${(p.images&&p.images[0]) ? `<img src="${p.images[0]}" alt="" loading="lazy" onclick="openImgLightbox(this.src)" style="width:64px;height:64px;min-width:64px;object-fit:cover;border-radius:12px;border:1px solid rgba(130,161,245,.4);background:#050b1e;cursor:pointer;display:block">` : `<div style="width:64px;height:64px;min-width:64px;border-radius:12px;border:1px dashed rgba(130,161,245,.4);display:flex;align-items:center;justify-content:center;color:#7f93c9"><i class="fa-solid fa-image"></i></div>`}</td>
       <td class="p-3 text-mist-200">${escapeHtml(p.name)}${(()=>{ const own = Number(p.discount)>0; const lb = own ? discLabelAdmin(Number(p.discount), p.discountType||'pct') : discLabelAdmin(_gd, _gt); return lb ? `<span class="ml-2 text-[11px] px-1.5 py-0.5 rounded-full bg-gradient-to-r from-[#ff1744] to-[#ff9100] text-white font-mono">${lb}</span>` : ''; })()}</td>
       <td class="p-3 text-mist-400">${escapeHtml((getCategories().find(c=>c.id===p.category)||{}).name||p.category||'-')}</td>
       <td class="p-3 font-mono text-ion-400">${(p.options&&p.options.length) ? p.options.map(o=>`<div class="whitespace-nowrap">${escapeHtml(o.label)}: ₭${fmtK(o.price)}</div>`).join('') : '₭'+fmtK(p.price)}</td>
       <td class="p-3 font-mono text-mist-300">${stockDisplay}</td>
-      <td class="p-3"><span class="text-xs px-2 py-1 rounded bg-ink-700 text-mist-300">${statusLabel[p.status]}</span>${p.maintenance?'<span class="ml-1 text-xs px-2 py-1 rounded bg-amber-500/20 text-amber-300"><i class="fa-solid fa-screwdriver-wrench mr-1"></i>ກຳລັງປັບປຸງ</span>':''}</td>
+      <td class="p-3 whitespace-nowrap"><span class="text-xs px-2 py-1 rounded bg-ink-700 text-mist-300 whitespace-nowrap">${statusLabel[p.status]}</span>${p.maintenance?'<span class="ml-1 text-xs px-2 py-1 rounded bg-amber-500/20 text-amber-300"><i class="fa-solid fa-screwdriver-wrench mr-1"></i>ກຳລັງປັບປຸງ</span>':''}</td>
       <td class="p-3 text-mist-400 text-xs">${fmtDate(p.date)}</td>
-      <td class="p-3"><button onclick="openProductForm('${p.id}')" class="text-plasma-400 hover:underline text-xs mr-3">ແກ້ໄຂ</button><button onclick="toggleMaintenance('${p.id}')" class="${p.maintenance?'text-amber-300 font-700':'text-mist-300'} hover:underline text-xs mr-3"><i class="fa-solid fa-screwdriver-wrench mr-1"></i>${p.maintenance?'ເປີດຂາຍ':'ປັບປຸງ'}</button><button onclick="deleteProduct('${p.id}')" class="text-red-400 hover:underline text-xs">ລຶບ</button></td>
+      <td class="p-3"><div class="act-group"><button onclick="openProductForm('${p.id}')" class="act-btn act-edit"><i class="fa-solid fa-pen-to-square"></i> ແກ້ໄຂ</button><button onclick="toggleMaintenance('${p.id}')" class="act-btn ${p.maintenance?'act-open':'act-maint'}"><i class="fa-solid fa-screwdriver-wrench"></i> ${p.maintenance?'ເປີດຂາຍ':'ປັບປຸງ'}</button><button onclick="deleteProduct('${p.id}')" class="act-btn act-del"><i class="fa-solid fa-trash"></i> ລຶບ</button></div></td>
     </tr>`;
   }).join('') || `<tr><td colspan="8" class="text-center py-8 text-mist-400">ຍັງບໍ່ມີສິນຄ້າ, ກົດ "ເພີ່ມສິນຄ້າ" ເພື່ອເລີ່ມໂພສສິນຄ້າຂອງທ່ານ</td></tr>`;
 }
@@ -3074,13 +3068,13 @@ function _paintAdminUsers(users){
       <td class="p-3 text-mist-400">${escapeHtml(u.email||'-')}</td>
       <td class="p-3 text-mist-400">${escapeHtml(u.phone||'-')}</td>
       <td class="p-3 text-mist-400 text-xs">${fmtDate(u.createdAt)}</td>
-      <td class="p-3"><span class="text-xs px-2 py-1 rounded ${u.suspended?'bg-red-500/20 text-red-400':'bg-green-500/20 text-green-400'}">${u.suspended?'ຖືກລະງັບ':'ໃຊ້ງານໄດ້'}</span></td>
-      <td class="p-3">
-        <button onclick="openUserDetailModal('${u.id}')" class="text-xs text-ion-400 hover:underline mr-3">ລາຍລະອຽດ</button>
-        <button onclick="adminTopupUser('${u.id}')" class="text-xs text-green-400 hover:underline mr-3">ເຕີມເງິນ</button>
-        <button onclick="toggleSuspendUser('${u.id}')" class="text-xs text-plasma-400 hover:underline mr-3">${u.suspended?'ຍົກເລີກລະງັບ':'ລະງັບບັນຊີ'}</button>
-        <button onclick="deleteUser('${u.id}')" class="text-xs text-red-400 hover:underline">ລຶບ</button>
-      </td>
+      <td class="p-3"><span class="text-xs px-2 py-1 rounded whitespace-nowrap inline-block ${u.suspended?'bg-red-500/20 text-red-400':'bg-green-500/20 text-green-400'}">${u.suspended?'ຖືກລະງັບ':'ໃຊ້ງານໄດ້'}</span></td>
+      <td class="p-3"><div class="uact-grid">
+        <button onclick="openUserDetailModal('${u.id}')" class="uact uact-info"><i class="fa-solid fa-circle-info"></i> ລາຍລະອຽດ</button>
+        <button onclick="adminTopupUser('${u.id}')" class="uact uact-green"><i class="fa-solid fa-wallet"></i> ເຕີມເງິນ</button>
+        <button onclick="toggleSuspendUser('${u.id}')" class="uact uact-warn"><i class="fa-solid fa-ban"></i> ${u.suspended?'ຍົກເລີກລະງັບ':'ລະງັບບັນຊີ'}</button>
+        <button onclick="deleteUser('${u.id}')" class="uact uact-red"><i class="fa-solid fa-trash"></i> ລຶບ</button>
+      </div></td>
     </tr>`).join('') || `<tr><td colspan="6" class="text-center py-8 text-mist-400">ຍັງບໍ່ມີຜູ້ໃຊ້</td></tr>`;
 }
 async function openUserDetailModal(userId){
@@ -4012,5 +4006,180 @@ function agentClearBanner(){
   setInterval(tick, 1000);
 })();
 </script>
+<style id="square-buttons-override">
+/* ===== ທຸກປຸ່ມເປັນສີ່ຫຼ່ຽມ (ບໍ່ມົນ) ===== */
+button,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+input[type="file"]::file-selector-button,
+[role="button"],
+a.btn, .btn,
+[class*="btn"],
+button[class*="rounded"],
+a[class*="rounded"][class*="px-"],
+label[class*="rounded"][class*="px-"],
+.adminnav,
+.swal2-styled,
+.swal2-confirm, .swal2-cancel, .swal2-deny,
+#welcomePopup .wp-close,
+#welcomePopup .wp-hide,
+#productFormModal button,
+#userDetailModal button,
+#view-admin .admincontent button,
+body button,
+body button.rounded, body button.rounded-md, body button.rounded-lg,
+body button.rounded-xl, body button.rounded-2xl, body button.rounded-3xl,
+body button.rounded-full {
+  border-radius: 0 !important;
+  -webkit-border-radius: 0 !important;
+}
+</style>
+<style id="product-action-buttons">
+/* ===== ປຸ່ມ ແກ້ໄຂ / ປັບປຸງ / ລຶບ ໃນຕາຕະລາງສິນຄ້າ: ສີ່ຫຼ່ຽມ ແຖວດຽວ ເປັນລະບຽບ ===== */
+#adm-products .overflow-x-auto{ -webkit-overflow-scrolling:touch; }
+#adm-products table{ min-width:860px; }
+#adm-products table th, #adm-products table td{ vertical-align:middle !important; }
+#adm-products table td:nth-child(7){ white-space:nowrap; }
+#admProductTable .act-group{ display:flex; flex-wrap:nowrap; align-items:center; gap:6px; }
+#admProductTable .act-btn{
+  display:inline-flex !important; align-items:center; justify-content:center; gap:6px;
+  min-width:84px; height:34px; padding:0 12px !important; margin:0 !important;
+  border-radius:0 !important; border:1px solid transparent; background:transparent;
+  font-size:12px !important; font-weight:700; line-height:1; white-space:nowrap !important;
+  text-decoration:none !important; cursor:pointer; transition:.15s;
+}
+#admProductTable .act-btn:hover{ text-decoration:none !important; filter:brightness(1.2); }
+#admProductTable .act-btn:active{ transform:translateY(1px); }
+#admProductTable .act-edit { color:#9db8ff; background:rgba(69,116,240,.18); border-color:#4574f0; }
+#admProductTable .act-maint{ color:#cfd9f7; background:rgba(152,173,232,.12); border-color:#5a6fae; }
+#admProductTable .act-open { color:#fcd34d; background:rgba(245,158,11,.20); border-color:#f59e0b; }
+#admProductTable .act-del  { color:#ff8a8a; background:rgba(239,68,68,.18); border-color:#ef4444; }
+
+/* ===== ເມນູແອັດມິນ 20 ປຸ່ມ: ສີ່ຫຼ່ຽມໃຫຍ່ ເທົ່າປຸ່ມ "ເພີ່ມສິນຄ້າ" ກົດງ່າຍ ===== */
+#view-admin nav .adminnav{
+  display:flex !important; flex-direction:column; align-items:center; justify-content:center;
+  gap:6px; text-align:center; width:100%;
+  min-height:72px; padding:12px 14px !important;
+  font-size:.875rem !important; font-weight:600; line-height:1.3;
+  color:#dbe6ff;
+  background:linear-gradient(180deg,#1b3478 0%,#172d68 100%) !important;
+  border:1px solid rgba(130,161,245,.45) !important;
+  border-radius:0 !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 4px 12px -6px rgba(0,0,0,.6);
+  -webkit-tap-highlight-color:transparent;
+}
+#view-admin nav .adminnav i{ width:auto !important; font-size:1.25rem; margin:0 !important; }
+#view-admin nav .adminnav:active{ transform:scale(.97); }
+#view-admin nav .adminnav.bg-ink-700{
+  background-image:linear-gradient(180deg,#4a78f0 0%,#2c5ad2 50%,#1c41a4 100%) !important;
+  color:#fff !important; border-color:rgba(130,161,245,.8) !important;
+}
+#view-admin nav{ gap:8px !important; }
+
+/* ===== ປຸ່ມຈັດການຜູ້ໃຊ້: ສີ່ຫຼ່ຽມໃຫຍ່ ແຍກຫ່າງກັນ ກົດງ່າຍ ===== */
+.uact-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; min-width:240px; }
+#view-admin button.uact{
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  min-height:46px; padding:10px 12px; font-size:.8rem; font-weight:600; line-height:1.2;
+  text-align:center; text-decoration:none !important; white-space:nowrap;
+  border:1px solid; border-radius:0 !important; -webkit-tap-highlight-color:transparent;
+}
+#view-admin button.uact:active{ transform:scale(.96); }
+#view-admin button.uact-info{ color:#7fb0ff; background:rgba(60,110,230,.18); border-color:rgba(127,176,255,.5); }
+#view-admin button.uact-green{ color:#4ade80; background:rgba(34,197,94,.16); border-color:rgba(74,222,128,.5); }
+#view-admin button.uact-warn{ color:#fbbf24; background:rgba(245,158,11,.16); border-color:rgba(251,191,36,.5); }
+#view-admin button.uact-red{ color:#f87171; background:rgba(239,68,68,.16); border-color:rgba(248,113,113,.5); }
+</style>
+
+<style id="admin-page-mode">
+/* ===== ມືຖື: ກົດເມນູ -> ເປີດເປັນໜ້າໃໝ່ເລີຍ (ເມນູຖືກເຊື່ອງ) ມີແຖບປຸ່ມຍ້ອນກັບຢູ່ເທິງ ===== */
+#admBackBar{ display:none; }
+@media (max-width:1023px){
+  #view-admin:not(.adm-page) .admincontent{ display:none !important; }
+  #view-admin.adm-page aside{ display:none !important; }
+  #view-admin.adm-page #admBackBar{
+    display:block; position:sticky; top:64px; z-index:40;
+    padding:8px 0 10px; margin-bottom:6px;
+    background:linear-gradient(180deg,#08122f 70%,rgba(8,18,47,0));
+  }
+  #admBackBtn{
+    display:flex; align-items:center; justify-content:center; gap:10px; width:100%;
+    min-height:56px; padding:12px 16px; font-size:1rem; font-weight:700; color:#fff;
+    background:linear-gradient(180deg,#4a78f0 0%,#2c5ad2 50%,#1c41a4 100%);
+    border:1px solid rgba(130,161,245,.8); border-radius:0 !important;
+    box-shadow:0 8px 20px -8px rgba(44,90,210,.8);
+    -webkit-tap-highlight-color:transparent;
+  }
+  #admBackBtn:active{ transform:scale(.98); }
+}
+</style>
+<script>
+(function(){
+  function isMobile(){ return window.innerWidth<1024; }
+  function view(){ return document.getElementById('view-admin'); }
+  function top0(){ window.scrollTo(0,0); }
+  // ສ້າງແຖບປຸ່ມຍ້ອນກັບ ໄວ້ເທິງສຸດຂອງເນື້ອຫາ
+  function ensureBar(){
+    if(document.getElementById('admBackBar')) return;
+    var aside=document.querySelector('#view-admin aside'); if(!aside) return;
+    var col=aside.nextElementSibling; if(!col) return;
+    var bar=document.createElement('div'); bar.id='admBackBar';
+    bar.innerHTML='<button type="button" id="admBackBtn"><i class="fa-solid fa-arrow-left"></i> ກັບໄປເມນູ</button>';
+    col.insertBefore(bar,col.firstChild);
+    bar.querySelector('button').addEventListener('click',function(){
+      var v=view(); if(v) v.classList.remove('adm-page'); top0();
+    });
+  }
+  window.adminOpenPage=function(tab){
+    ensureBar();
+    try{ adminTab(tab); }catch(e){}
+    var v=view(); if(v && isMobile()){ v.classList.add('adm-page'); top0(); }
+  };
+  // ກົດປຸ່ມເມນູ -> ເປີດໜ້ານັ້ນເລີຍ
+  document.addEventListener('click',function(e){
+    var b=e.target.closest && e.target.closest('.adminnav');
+    if(!b || !isMobile()) return;
+    ensureBar();
+    setTimeout(function(){ var v=view(); if(v){ v.classList.add('adm-page'); top0(); } },0);
+  },true);
+  if(document.readyState!=='loading') ensureBar(); else document.addEventListener('DOMContentLoaded',ensureBar);
+})();
+</script>
+
+<style id="admin-only-mode">
+/* ເຊື່ອງສະເພາະສ່ວນລຸ່ມ (ຕີນເວັບ) — ສ່ວນເທິງ (ແຖບແລ່ນ + ຫົວເວັບ) ສະແດງຄືເກົ່າ */
+footer{ display:none !important; }
+</style>
+
+<style id="rounded-buttons">
+/* ===== ທຸກປຸ່ມ: ຮູບສີ່ຫຼ່ຽມ ແຕ່ແຈໂຄ້ງມົນ ===== */
+html body button,
+html body button.rounded, html body button.rounded-md, html body button.rounded-lg,
+html body button.rounded-xl, html body button.rounded-2xl, html body button.rounded-3xl, html body button.rounded-full,
+html body input[type="button"], html body input[type="submit"], html body input[type="reset"],
+html body input[type="file"]::file-selector-button,
+html body [role="button"], html body a.btn, html body .btn, html body [class*="btn"],
+html body a[class*="rounded"][class*="px-"], html body label[class*="rounded"][class*="px-"],
+html body .adminnav, html body .swal2-styled, html body .swal2-confirm, html body .swal2-cancel, html body .swal2-deny,
+html body #welcomePopup .wp-close, html body #welcomePopup .wp-hide,
+html body #productFormModal button, html body #userDetailModal button,
+html body #view-admin .admincontent button,
+html body #view-admin nav .adminnav, html body #view-admin button.uact, html body #admBackBtn{
+  border-radius:12px !important;
+  -webkit-border-radius:12px !important;
+}
+</style>
+
+<style id="admin-stats-top">
+@media (max-width:1023px){
+  #view-admin.adm-page #adminStatsTop{ display:none !important; }
+  /* ໜ້າເມນູ: ບໍ່ໃຫ້ມີປຸ່ມໃດຖືກໄຮໄລທ໌ຄ້າງ */
+  #view-admin:not(.adm-page) nav .adminnav.bg-ink-700{
+    background-image:linear-gradient(180deg,#1b3478 0%,#172d68 100%) !important;
+    color:#dbe6ff !important; border-color:rgba(130,161,245,.45) !important;
+  }
+}
+</style>
 </body>
 </html>
