@@ -562,6 +562,19 @@ body .bg-plasma-500 i, body .bg-ion-500 i, body [class*="from-plasma-500"] i{ co
       <button onclick="removeTopupGuideVideo()" class="px-5 py-2.5 rounded-lg bg-ink-700 hover:bg-ink-600 text-mist-300 font-display font-600 text-sm">ລຶບລິ້ງ</button>
     </div>
   </div>
+
+  <div class="bg-ink-800/60 border border-ink-700 rounded-xl p-6 max-w-lg mt-5">
+    <p class="font-display font-600 text-mist-100 mb-1"><i class="fa-solid fa-link text-plasma-400 mr-1.5"></i>ປຸ່ມລິ້ງ (ຢູ່ເທິງສຸດໜ້າ ລົງຊື່ເຂົ້າໃຊ້)</p>
+    <p class="text-sm text-mist-400 mb-4">ຕັ້ງຊື່ປຸ່ມ ແລະ ລິ້ງ. ເມື່ອລູກຄ້າກົດບ່ອນ ລົງຊື່ເຂົ້າໃຊ້ (ເຂົ້າສູ່ລະບົບ / ສະໝັກສະມາຊິກ) ປຸ່ມນີ້ຈະສະແດງຢູ່ເທິງສຸດຂອງໜ້າທັນທີ ແລະ ເປີດລິ້ງໃນແຖບໃໝ່. ບໍ່ໃສ່ = ບໍ່ສະແດງປຸ່ມ.</p>
+    <label class="block text-xs text-mist-400 mb-1">ຊື່ປຸ່ມ</label>
+    <input id="adminTopupGuideLinkLabel" type="text" maxlength="40" placeholder="ເຊັ່ນ: ເບິ່ງວິທີສະໝັກ" class="w-full bg-ink-900 border border-ink-600 rounded-lg px-4 py-2.5 text-mist-100 text-sm mb-3">
+    <label class="block text-xs text-mist-400 mb-1">ລິ້ງ (ຕ້ອງຂຶ້ນຕົ້ນດ້ວຍ https://)</label>
+    <input id="adminTopupGuideLinkUrl" type="url" placeholder="https://..." class="w-full bg-ink-900 border border-ink-600 rounded-lg px-4 py-2.5 text-mist-100 text-sm">
+    <div class="flex gap-2 mt-4">
+      <button onclick="saveTopupGuideLink()" class="px-5 py-2.5 rounded-lg bg-plasma-500 hover:bg-plasma-600 font-display font-600 text-sm">ບັນທຶກປຸ່ມລິ້ງ</button>
+      <button onclick="removeTopupGuideLink()" class="px-5 py-2.5 rounded-lg bg-ink-700 hover:bg-ink-600 text-mist-300 font-display font-600 text-sm">ລຶບປຸ່ມລິ້ງ</button>
+    </div>
+  </div>
 </div>
 
 <div id="adm-musicsettings" class="admincontent hidden">
@@ -1835,6 +1848,24 @@ function refreshTopupGuideAdmin(){
   if(st.topupGuideImage){ el.style.backgroundImage = `url('${st.topupGuideImage}')`; el.textContent = ''; }
   else { el.style.backgroundImage = ''; el.textContent = 'ຍັງບໍ່ມີຮູບສອນເຕີມເງິນ'; }
   refreshTopupGuideVideoAdmin();
+  const _ll = document.getElementById('adminTopupGuideLinkLabel'), _lu = document.getElementById('adminTopupGuideLinkUrl');
+  if(_ll) _ll.value = st.topupGuideLinkLabel || ''; if(_lu) _lu.value = st.topupGuideLinkUrl || '';
+}
+function saveTopupGuideLink(){
+  const label = (document.getElementById('adminTopupGuideLinkLabel')?.value || '').trim();
+  const url = (document.getElementById('adminTopupGuideLinkUrl')?.value || '').trim();
+  if(!label) return toastErr('ກະລຸນາໃສ່ຊື່ປຸ່ມ');
+  if(!/^https?:\/\//i.test(url)) return toastErr('ລິ້ງຕ້ອງຂຶ້ນຕົ້ນດ້ວຍ https://');
+  const st = loadDB(DB_KEYS.settings, {});
+  st.topupGuideLinkLabel = label; st.topupGuideLinkUrl = url; saveDB(DB_KEYS.settings, st);
+  toastOk('ບັນທຶກປຸ່ມລິ້ງສຳເລັດ');
+}
+function removeTopupGuideLink(){
+  const st = loadDB(DB_KEYS.settings, {});
+  st.topupGuideLinkLabel = null; st.topupGuideLinkUrl = null; saveDB(DB_KEYS.settings, st);
+  const a = document.getElementById('adminTopupGuideLinkLabel'), b = document.getElementById('adminTopupGuideLinkUrl');
+  if(a) a.value = ''; if(b) b.value = '';
+  toastOk('ລຶບປຸ່ມລິ້ງແລ້ວ');
 }
 function ytIdFromUrl(u){
   u = String(u||'').trim(); if(!u) return '';
