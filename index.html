@@ -288,7 +288,10 @@ body .bg-plasma-500 i, body .bg-ion-500 i, body [class*="from-plasma-500"] i{ co
 
   function resize(){
     dpr = Math.min(window.devicePixelRatio || 1, 2);
-    W = window.innerWidth; H = window.innerHeight;
+    var nW = window.innerWidth, nH = window.innerHeight;
+    /* FIX: ແຖບ URL ຂອງມືຖືຍຸບ/ຂະຫຍາຍຕອນເລື່ອນ ເຮັດໃຫ້ resize ຍິງຖີ່ ແລະຕັ້ງ canvas ໃໝ່ທຸກເທື່ອ → ກະຕຸກ. ຂ້າມຖ້າປ່ຽນໜ້ອຍ */
+    if(W && nW===W && Math.abs(nH-H)<160 && canvas.width){ return; }
+    W = nW; H = nH;
     canvas.width = W*dpr; canvas.height = H*dpr;
     ctx.setTransform(dpr,0,0,dpr,0,0);
     const target = Math.round(Math.min(W*H/9000, 160)); // scales with screen size
@@ -382,7 +385,6 @@ body .bg-plasma-500 i, body .bg-ion-500 i, body [class*="from-plasma-500"] i{ co
           <button onclick="adminTab('topups')" data-tab="topups" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-receipt w-4"></i> ກວດສະລິບເຕີມເງິນ <span id="topupBadge" class="hidden ml-1 px-1.5 py-0.5 rounded-full bg-red-500 text-white text-[10px] font-mono">0</span></button>
           <button onclick="adminTab('topuplookup')" data-tab="topuplookup" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-clock-rotate-left w-4"></i> ກວດປະຫວັດເຕີມເງິນ</button>
           <button onclick="adminTab('wallet')" data-tab="wallet" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-money-bill-transfer w-4"></i> ເຕີມ / ຫັກເງິນ (ດ້ວຍເບີ)</button>
-          <button onclick="adminTab('codes')" data-tab="codes" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-ticket w-4"></i> ໂຄດເຕີມເງິນ</button>
           <button onclick="adminTab('qrsettings')" data-tab="qrsettings" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-qrcode w-4"></i> ຕັ້ງຄ່າ QR ຊຳລະເງິນ</button>
           <button onclick="adminTab('bgsettings')" data-tab="bgsettings" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-image w-4"></i> ຕັ້ງຄ່າພື້ນຫຼັງເວັບ</button>
           <button onclick="adminTab('topupguide')" data-tab="topupguide" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-circle-question w-4"></i> ຮູບ/ວິດີໂອສອນເຕີມເງິນ</button>
@@ -393,7 +395,7 @@ body .bg-plasma-500 i, body .bg-ion-500 i, body [class*="from-plasma-500"] i{ co
           <button onclick="adminTab('herobanner')" data-tab="herobanner" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-panorama w-4"></i> ແບນເນີ Hero</button>
           <button onclick="adminTab('installguide')" data-tab="installguide" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-circle-info w-4"></i> ວິທີລົງຄ່າ / ໄຟລ໌</button>
           <button onclick="adminTab('marqueesettings')" data-tab="marqueesettings" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-bullhorn w-4"></i> ຂໍ້ຄວາມແລ່ນ</button>
-          <button onclick="adminTab('wheel')" data-tab="wheel" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-dharmachakra w-4"></i> ວົງລໍສິນຄ້າ</button>
+          <button onclick="restoreSettingsFromBackup()" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-rotate-left w-4"></i> ກູ້ຄືນຂໍ້ມູນຕັ້ງຄ່າ (ໝວດໝູ່/ຮູບ) ຈາກສຳຮອງ</button>
           <button onclick="adminTab('fbnotify')" data-tab="fbnotify" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-brands fa-facebook-messenger w-4"></i> ແຈ້ງເຕືອນເຟສບຸກ</button>
           <button onclick="adminTab('notifications')" data-tab="notifications" class="adminnav w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-ink-700 text-mist-200"><i class="fa-solid fa-bell w-4"></i> ຈັດການແຈ້ງເຕືອນ</button>
           
@@ -475,27 +477,6 @@ body .bg-plasma-500 i, body .bg-ion-500 i, body [class*="from-plasma-500"] i{ co
   </div>
 </div>
 
-<div id="adm-codes" class="admincontent hidden">
-  <div class="flex items-center justify-between gap-3 mb-5">
-    <h2 class="font-display font-700 text-2xl text-mist-100">ໂຄດເຕີມເງິນ</h2>
-    <button onclick="renderAdminCodes()" class="px-3 py-2 rounded-lg bg-ink-700 hover:bg-ink-600 text-mist-200 text-xs font-display"><i class="fa-solid fa-rotate mr-1"></i>ໂຫຼດຄືນໃໝ່</button>
-  </div>
-  <div class="bg-ink-800/60 border border-ink-700 rounded-xl p-5 max-w-lg mb-6">
-    <p class="font-display text-mist-100 font-600 mb-3">ສ້າງໂຄດໃໝ່</p>
-    <label class="text-xs font-display text-mist-400 uppercase">ຈຳນວນເງິນໃນໂຄດ (₭)</label>
-    <input id="codeAmount" type="number" min="1" placeholder="ເຊັ່ນ 10000" class="w-full mt-1 mb-3 px-3 py-2.5 rounded-lg bg-ink-900 border border-ink-600 text-mist-100 text-sm font-mono">
-    <label class="text-xs font-display text-mist-400 uppercase">ຈຳກັດຈຳນວນຄົນທີ່ໃຊ້ໄດ້</label>
-    <input id="codeMaxUses" type="number" min="1" placeholder="ເຊັ່ນ 10 ຄົນ" class="w-full mt-1 mb-4 px-3 py-2.5 rounded-lg bg-ink-900 border border-ink-600 text-mist-100 text-sm font-mono">
-    <button onclick="createRedeemCode()" class="w-full py-2.5 rounded-lg bg-plasma-500 hover:bg-plasma-600 font-display font-600 text-sm"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> ສ້າງໂຄດ (ສຸ່ມອັດຕະໂນມັດ)</button>
-    <p class="text-[11px] text-mist-400 mt-2">ລະບົບຈະສຸ່ມໂຄດໃຫ້ເອງ. ຜູ້ໃຊ້ແຕ່ລະຄົນໃຊ້ໂຄດດຽວກັນໄດ້ພຽງ 1 ຄັ້ງ.</p>
-  </div>
-  <div class="bg-ink-800/60 border border-ink-700 rounded-xl overflow-x-auto">
-    <table class="w-full text-sm">
-      <thead><tr class="text-left text-mist-400 font-display uppercase text-xs border-b border-ink-700"><th class="p-3">ໂຄດ</th><th class="p-3">ຈຳນວນເງິນ</th><th class="p-3">ໃຊ້ແລ້ວ / ຈຳກັດ</th><th class="p-3">ສະຖານະ</th><th class="p-3">ວັນທີສ້າງ</th><th class="p-3">ຈັດການ</th></tr></thead>
-      <tbody id="admCodeTable"></tbody>
-    </table>
-  </div>
-</div>
 
 <div id="adm-qrsettings" class="admincontent hidden">
   <h2 class="font-display font-700 text-2xl text-mist-100 mb-5">ຕັ້ງຄ່າ QR ຮັບຊຳລະເງິນ</h2>
@@ -592,7 +573,7 @@ body .bg-plasma-500 i, body .bg-ion-500 i, body [class*="from-plasma-500"] i{ co
   <div class="bg-ink-800/60 border border-ink-700 rounded-xl p-6 max-w-lg">
     <p class="text-sm text-mist-400 mb-4">ຕັ້ງຊື່ບັນຊີຮັບເງິນຂອງຮ້ານ. ເມື່ອລູກຄ້າອັບໂຫຼດສະລິບ ລະບົບຈະອ່ານສະລິບ ແລະ ເຕີມຊື່ຜູ້ໂອນ + ເວລາໂອນໃຫ້ອັດຕະໂນມັດ ຈາກນັ້ນກວດ ຊື່ຜູ້ຮັບ, ເວລາ, ວັນທີ, ຈຳນວນເງິນ ແລະ ເລກອ້າງອີງ (ກັນສະລິບຊ້ຳ). ຖືກຕ້ອງທຸກຢ່າງ → ເຕີມເງິນໃຫ້ອັດຕະໂນມັດຫຼັງ ~10 ວິ. ບໍ່ຖືກ / ສະລິບບໍ່ຊັດ / ສະລິບເກົ່າ (ມື້ວານ) / ສະລິບຊ້ຳ → ປະໄວ້ໃຫ້ແອັດມິນກວດເອງໃນແທັບ "ກວດສອບເຕີມເງິນ" (ລູກຄ້າບໍ່ເຫັນວ່າຖືກປະຕິເສດ).</p>
     <label class="text-xs font-display text-mist-400 uppercase">ຊື່ບັນຊີຮັບເງິນ (ພິມຕາມທີ່ປາກົດໃນສະລິບ)</label>
-    <input id="payReceiverName" type="text" placeholder="ຕົວຢ່າງ: SOMCHAI VONGSA" class="mt-1 mb-4 w-full px-3 py-2.5 rounded-lg bg-ink-900 border border-ink-700 text-sm text-mist-100">
+    <input id="payReceiverName" type="text" placeholder="ຕົວຢ່າງ: TO KANTANA MR" class="mt-1 mb-4 w-full px-3 py-2.5 rounded-lg bg-ink-900 border border-ink-700 text-sm text-mist-100">
     <label class="text-xs font-display text-mist-400 uppercase">ຊື່ອື່ນທີ່ອາດປາກົດໃນສະລິບ (ຄັ່ນດ້ວຍ , ບໍ່ບັງຄັບ)</label>
     <input id="payReceiverAliases" type="text" placeholder="ເຊັ່ນ: SOMCHAI V, ສົມໃຈ ວົງສາ" class="mt-1 mb-4 w-full px-3 py-2.5 rounded-lg bg-ink-900 border border-ink-700 text-sm text-mist-100">
     <label class="text-xs font-display text-mist-400 uppercase">ເວລາຄາດເຄື່ອນໄດ້ (ນາທີ)</label>
@@ -684,23 +665,6 @@ body .bg-plasma-500 i, body .bg-ion-500 i, body [class*="from-plasma-500"] i{ co
   </div>
 </div>
 
-<div id="adm-wheel" class="admincontent hidden">
-  <h2 class="font-display font-700 text-2xl text-mist-100 mb-5">ວົງລໍສິນຄ້າ</h2>
-  <div class="bg-ink-800/60 border border-ink-700 rounded-xl p-6 max-w-2xl">
-    <label class="flex items-center gap-2 text-mist-100 font-display"><input id="wheelEnabled" type="checkbox" class="w-4 h-4"> ເປີດໃຊ້ວົງລໍໃນໜ້າເວັບ</label>
-    <label class="flex items-center gap-2 text-mist-200 text-sm mt-3"><input id="wheelShowOdds" type="checkbox" class="w-4 h-4"> ສະແດງລາຍການສິນຄ້າ + ເປີເຊັນໃຫ້ລູກຄ້າເຫັນ (ປິດໄວ້ = ລູກຄ້າບໍ່ເຫັນ)</label>
-    <label class="text-xs font-display text-mist-400 uppercase mt-4 block">ລາຄາຫມຸນ 1 ຄັ້ງ (₭)</label>
-    <input id="wheelPrice" type="number" min="1" placeholder="ເຊັ່ນ 5000" class="mt-1.5 w-40 bg-ink-900 border border-ink-600 rounded-lg px-4 py-2.5 text-mist-100">
-    <p class="text-sm text-mist-400 mt-4 mb-2">ເລືອກສິນຄ້າທີ່ຢູ່ໃນວົງລໍ ແລະ ໃສ່ "ນ້ຳໜັກ" (ເລກຍິ່ງຫຼາຍ ໂອກາດຍິ່ງສູງ). ເປີເຊັນທີ່ຄຳນວນໄດ້ສະແດງຢູ່ຂ້າງແຖວ (ລູກຄ້າເຫັນກໍຕໍ່ເມື່ອຕິກ "ສະແດງ" ດ້ານເທິງ). ຕົວເລືອກທີ່ລູກຄ້າໄດ້ຮັບ = ຕົວເລືອກລາຄາຖືກສຸດທີ່ຍັງມີສະຕັອກ.</p>
-    <div id="wheelItems" class="space-y-2"></div>
-    <div class="flex items-center justify-between gap-2 mt-6 mb-2">
-      <p class="text-sm text-mist-400">ຊ່ອງພິເສດ (ບໍ່ມີສິນຄ້າ ເຊັ່ນ ❌ ໂຊກດີຄັ້ງຕໍ່ໄປ) — ສະແດງໃນວົງລໍ ແຕ່ລູກຄ້າບໍ່ໄດ້ສິນຄ້າ</p>
-      <button type="button" onclick="addWheelCustom()" class="shrink-0 px-3 py-1.5 rounded-lg bg-ink-700 hover:bg-ink-600 text-mist-100 text-xs font-display"><i class="fa-solid fa-plus mr-1"></i>ເພີ່ມຊ່ອງ</button>
-    </div>
-    <div id="wheelCustom" class="space-y-2"></div>
-    <button onclick="saveWheelSettings()" class="mt-5 px-5 py-2.5 rounded-lg bg-plasma-500 hover:bg-plasma-600 font-display font-600 text-sm">ບັນທຶກ</button>
-  </div>
-</div>
 <div id="adm-fbnotify" class="admincontent hidden">
   <h2 class="font-display font-700 text-2xl text-mist-100 mb-5">ແຈ້ງເຕືອນ (Facebook + ເດັ້ງໃນໂທລະສັບ)</h2>
   <div class="bg-ink-800/60 border border-ink-700 rounded-xl p-6 max-w-lg">
@@ -1073,12 +1037,40 @@ const ADMIN_SYNC_KEYS = ['admins','products','orders','logs','topups','settings'
 // the fresh local save right back to nothing. pullAdminDataFromFirestore
 // waits for any pending write below before it reads, closing that gap.
 const _pendingSyncs = new Map();
+// FIX: ຈື່ວ່າຂໍ້ມູນໃນເຄື່ອງຍັງບໍ່ຂຶ້ນຄລາວ → ຕອນ pull ຈະບໍ່ເອາຂໍ້ມູນເກົ່າຈາກຄລາວມາທັບ (ເຮັດໃຫ້ QR ຫາຍ)
+window._syncOk = window._syncOk || {};
+const _DIRTY_TTL = 7*24*60*60*1000;
+function _markDirty(key){ try{ localStorage.setItem('vp_dirty_'+key, String(Date.now())); }catch(e){} }
+function _clearDirty(key){ try{ localStorage.removeItem('vp_dirty_'+key); }catch(e){} }
+function _isDirty(key){ try{ const t = Number(localStorage.getItem('vp_dirty_'+key)||0); return t && (Date.now()-t) < _DIRTY_TTL; }catch(e){ return false; } }
+// ລໍຖ້າການສົ່ງຂຶ້ນຄລາວຂອງ key ສຳເລັດ ແລ້ວບອກວ່າສຳເລັດບໍ່
+async function _waitSync(key){
+  try{ await new Promise(r=>setTimeout(r, 350)); const p = _pendingSyncs.get(key); if(p) await p; }catch(e){}
+  return window._syncOk[key] !== false;
+}
 // PERF: coalesce rapid saves of the same key (e.g. product save + log() + order save)
 // into ONE Firestore write of the latest value, instead of one big write per call.
 // SAFE CLOUD WRITE: never overwrite shop data blindly.
 //  - if the cloud copy can't be read, the write is aborted (no blind overwrite)
 //  - a non-admin device can never shrink existing cloud data to empty / <50%
 //  - before any big shrink (or wipe), the previous cloud copy is saved to shopDataBackup/<key>
+// FIX: ລວມ (merge) settings ແທນທີ່ຈະທັບທັງກ້ອນ — ກັນບໍ່ໃຫ້ຂໍ້ມູນເກົ່າທີ່ອັບໂຫຼດໄວ້ (ພື້ນຫຼັງ/ແບນເນີ/ໂລໂກ/QR/ເພງ...) ຫາຍ
+// ເມື່ອເຄື່ອງແອັດມິນມີຂໍ້ມູນໃນເຄື່ອງເກົ່າ/ຫວ່າງ ແລ້ວບັນທຶກສິ່ງໃໝ່ຂຶ້ນໄປ. ເອົາສະເພາະ key ທີ່ເຄື່ອງນີ້ແກ້ແທ້ໆ ເຂົ້າໄປທັບ.
+window._cloudBase = window._cloudBase || {};
+function _mergeSettings(cloud, local){
+  cloud = (cloud && typeof cloud==='object' && !Array.isArray(cloud)) ? cloud : {};
+  if(!local || typeof local!=='object' || Array.isArray(local)) return cloud;
+  const base = window._cloudBase.settings;
+  const same = (a,b)=> JSON.stringify(a)===JSON.stringify(b);
+  const empty = v => v==null || v==='' || (Array.isArray(v) && !v.length) || (typeof v==='object' && !Array.isArray(v) && !Object.keys(v).length);
+  const out = Object.assign({}, cloud);
+  Object.keys(local).forEach(k=>{
+    if(base && typeof base==='object'){ if(!same(local[k], base[k])) out[k] = local[k]; }
+    else if(!empty(local[k]) && !same(local[k], cloud[k])) out[k] = local[k];
+  });
+  if(base && typeof base==='object') Object.keys(base).forEach(k=>{ if(!(k in local)) delete out[k]; });
+  return out;
+}
 async function _guardedCloudSet(key, val){
   const ref = fbDb.collection(CLOUD_COLLECTION).doc(key);
   let old = null;
@@ -1086,6 +1078,10 @@ async function _guardedCloudSet(key, val){
   catch(e){ console.warn('Cloud read before write failed, write aborted for', key, e); throw e; }
   const isEmpty = v => v==null || (Array.isArray(v) ? v.length===0 : (typeof v==='object' && Object.keys(v).length===0));
   const isAdmin = typeof SESSION !== 'undefined' && SESSION && SESSION.role==='admin';
+  if(key==='settings' && isAdmin && old!=null && typeof old==='object' && !Array.isArray(old)){
+    val = _mergeSettings(old, val);
+    try{ localStorage.setItem(DB_KEYS.settings, JSON.stringify(val)); }catch(e){}   // ໃຫ້ໃນເຄື່ອງຕົງກັບຄລາວທີ່ລວມແລ້ວ
+  }
   if(old!=null && !isEmpty(old)){
     const a = JSON.stringify(old).length, b = JSON.stringify(val==null?null:val).length;
     const shrink = isEmpty(val) || b < a*0.5;
@@ -1093,6 +1089,7 @@ async function _guardedCloudSet(key, val){
     if(shrink){ try{ await fbDb.collection('shopDataBackup').doc(key).set({ data: old, savedAt: nowISO() }); }catch(e){ console.warn('backup failed', e); } }
   }
   await ref.set({ data: val, updatedAt: nowISO() });
+  if(key==='settings') window._cloudBase.settings = JSON.parse(JSON.stringify(val));
 }
 const _syncQueue = {};
 function syncKeyToFirestore(key, val){
@@ -1108,13 +1105,16 @@ function syncKeyToFirestore(key, val){
       delete _syncQueue[key];
       clearTimeout(q.timer);
       try{
-        if(!fbAuth.currentUser){ if(SESSION && SESSION.role==='admin' && typeof toastErr==='function') toastErr('ຍັງບໍ່ໄດ້ເຊື່ອມ ຖານຂໍ້ມູນ — '+cloudHint()); return; }
+        if(!fbAuth.currentUser && SESSION && SESSION.role==='admin'){ try{ await ensureAdminSession(); }catch(_e){} }
+        if(!fbAuth.currentUser){ window._syncOk[key] = false; _markDirty(key); if(SESSION && SESSION.role==='admin' && typeof toastErr==='function') toastErr('ຍັງບໍ່ໄດ້ເຊື່ອມ ຖານຂໍ້ມູນ — '+cloudHint()); return; }
         if(['products','settings','agents'].includes(key) && q.val && typeof q.val==='object'){
           try{ if(await autoFitImages(q.val, 900000)) localStorage.setItem(DB_KEYS[key], JSON.stringify(q.val)); }catch(e){ console.warn('auto-compress failed', e); }
         }
         await _guardedCloudSet(key, q.val);
+        window._syncOk[key] = true; _clearDirty(key);
         if(['products','settings'].includes(key) && SESSION && SESSION.role==='admin' && typeof toastOk==='function') toastOk('ສົ່ງຂຶ້ນລະບົບລູກຄ້າແລ້ວ ✓');
       }catch(e){
+        window._syncOk[key] = false; _markDirty(key);
         console.warn('Firestore sync failed for', key, e);
         if(SESSION && SESSION.role==='admin' && typeof toastErr === 'function'){
           toastErr(`ບໍ່ສາມາດ sync "${key}" ຂຶ້ນຄລາວໄດ້ (ອາດຮູບໃຫຍ່ເກີນໄປ)`);
@@ -1153,9 +1153,17 @@ function pullAdminDataFromFirestore(force){
         if(!ADMIN_SYNC_KEYS.includes(key)) return;
         const remote = d.data() && d.data().data;
         if(remote === undefined || remote === null) return;
-        // cloud copy is the single source of truth (see earlier delete-sticks fix)
-        const s = JSON.stringify(remote);
-        if(localStorage.getItem(DB_KEYS[key]) !== s){ localStorage.setItem(DB_KEYS[key], s); changed = true; }
+        if(key==='settings'){ try{ window._cloudBase.settings = JSON.parse(JSON.stringify(remote)); }catch(e){} }
+        // FIX: ຖ້າຂໍ້ມູນໃນເຄື່ອງຍັງສົ່ງຂຶ້ນຄລາວບໍ່ສຳເລັດ ຢ່າເອາຂອງເກົ່າຈາກຄລາວມາທັບ — ລອງສົ່ງໃໝ່ແທນ
+        if(_isDirty(key) && !_syncQueue[key]){
+          try{ const lv = JSON.parse(localStorage.getItem(DB_KEYS[key])); if(lv) syncKeyToFirestore(key, lv); }catch(e){}
+          return;
+        }
+        if(_syncQueue[key]) return;
+        try{
+          const s = JSON.stringify(remote);
+          if(localStorage.getItem(DB_KEYS[key]) !== s){ localStorage.setItem(DB_KEYS[key], s); changed = true; if(key==='settings') window._bannerList = null; }
+        }catch(e){ console.warn('pull save failed for', key, e); }
       });
       _lastPullAt = Date.now();
     }catch(e){ console.warn('Failed to pull admin data from Firestore', e); }
@@ -1250,7 +1258,46 @@ async function autoFitImages(root, limit){
     }
     if(size() <= limit) return true;
   }
+  // FIX: ຍັງໃຫຍ່ເກີນ → ບີບ QR ເປັນບາດກ້າວສຸດທ້າຍ (ຮັກສາຄວາມຄົມ: ຍ່ອຂະໜາດ ບໍ່ຫຼຸດຄຸນນະພາບ)
+  const qrRefs = [];
+  (function walkQ(o, inQr){
+    if(!o || typeof o!=='object') return;
+    for(const k of Object.keys(o)){
+      const v = o[k], isQ = inQr || /qr/i.test(k);
+      if(typeof v==='string'){ if(isQ && /^data:image\//i.test(v) && v.length>20000) qrRefs.push({o,k}); }
+      else if(v && typeof v==='object') walkQ(v, isQ);
+    }
+  })(root, false);
+  for(const [dim, bytes] of [[640,90*1024],[520,60*1024],[440,40*1024]]){
+    for(const r of qrRefs){
+      if(size() <= limit) return true;
+      if(r.o[r.k].length*0.75 > bytes){ try{ r.o[r.k] = await shrinkQrDataUrl(r.o[r.k], dim, bytes); }catch(e){} }
+    }
+    if(size() <= limit) return true;
+  }
   return size() <= 1000000;
+}
+// ບີບຮູບ QR: ໃຊ້ PNG ກ່ອນ (ຄົມ ສະແກນໄດ້), ຖ້າໃຫຍ່ຫຼາຍຄ່ອຍຍ່ອຂະໜາດ, ສຸດທ້າຍຄ່ອຍໃຊ້ WebP ຄຸນນະພາບສູງ
+async function shrinkQrDataUrl(dataUrl, maxDim, maxBytes){
+  const src = await _loadImgSource(dataUrl);
+  return _qrEncode(src, maxDim, maxBytes);
+}
+function _qrEncode(src, maxDim, maxBytes){
+  let dim = maxDim, out = null;
+  for(let i=0;i<8;i++){
+    const [w,h] = _fitDims(src.w, src.h, dim);
+    const c = _drawScaled(src, w, h);
+    out = c.toDataURL('image/png');
+    if(out.length*0.75 <= maxBytes) return out;
+    const wp = _WEBP_OK ? c.toDataURL('image/webp', 0.92) : c.toDataURL('image/jpeg', 0.92);
+    if(wp.length*0.75 <= maxBytes) return wp;
+    out = wp; dim = Math.round(dim*0.85);
+  }
+  return out;
+}
+async function compressQrFile(file){
+  const src = await _loadImgSource(file);
+  return _qrEncode(src, 720, 130*1024);
 }
 
 function loadDB(key, fallback){
@@ -1265,7 +1312,12 @@ function loadDB(key, fallback){
   }catch(e){ return fallback; }
 }
 function saveDB(key, val){
-  localStorage.setItem(key, JSON.stringify(val));
+  // FIX: localStorage ເຕັມ (QuotaExceeded) ເຄີຍເຮັດໃຫ້ທຸກປຸ່ມ/ຟັງຊັນພັງ → ດັກໄວ້, ຍັງສົ່ງຂຶ້ນຄລາວຕໍ່
+  try{ localStorage.setItem(key, JSON.stringify(val)); }
+  catch(e){
+    console.warn('localStorage save failed for', key, e);
+    try{ if(!window._quotaWarned){ window._quotaWarned = true; toastErr('ໜ່ວຍຄວາມຈຳໃນເຄື່ອງເຕັມ — ຂໍ້ມູນຈະຖືກເກັບຂຶ້ນລະບົບຄລາວແທນ'); } }catch(_){}
+  }
   if(key === DB_KEYS.users && Array.isArray(val)){
     // PERF: only push users that actually changed (was: EVERY user on every save)
     val.forEach(u=>{
@@ -1320,7 +1372,7 @@ function sendFacebookNotify(message){
   }catch(e){}
 }
 function ensureFbKey(){
-  try{ const st = loadDB(DB_KEYS.settings,{}); if(!st.fbApiKey || FB_OLD_KEYS.includes(String(st.fbApiKey).trim())){ st.fbApiKey = FB_DEFAULT_KEY; saveDB(DB_KEYS.settings, st); } }catch(e){}
+  try{ const st = loadDB(DB_KEYS.settings,{}); if(!st.fbApiKey || FB_OLD_KEYS.includes(String(st.fbApiKey).trim())){ st.fbApiKey = FB_DEFAULT_KEY; localStorage.setItem(DB_KEYS.settings, JSON.stringify(st)); } }catch(e){}   /* FIX: ບັນທຶກໃນເຄື່ອງເທົ່ານັ້ນ — ບໍ່ສົ່ງຂຶ້ນຄລາວ ເພື່ອບໍ່ໃຫ້ທັບຂໍ້ມູນເກົ່າ */
 }
 setTimeout(ensureFbKey, 4000);
 function uid(prefix){ return prefix + '_' + Math.random().toString(36).slice(2,9) + Date.now().toString(36).slice(-4); }
@@ -1648,6 +1700,22 @@ async function seedCloudFromLocalIfEmpty(){
   setTimeout(()=>{ if(window.showWelcomePopup) window.showWelcomePopup(); }, 500);
 })().catch(e=>{ console.error("init failed", e); try{ (window.__bootErrors||[]).push(String((e&&e.message)||e).slice(0,120)); }catch(_){} _hideLoadOverlay(); if(window.__bootCheck) window.__bootCheck(); });
 
+
+// ===== ແອດມິນຫຼາຍເຄື່ອງ: ດຶງຂໍ້ມູນຈາກຄລາວເມື່ອກັບມາເປີດໜ້າ ແລະ ທຸກ 30 ວິ =====
+(function(){
+  async function _adminResync(){
+    try{
+      if(document.hidden || !BACKEND_ENABLED) return;
+      if(!fbAuth.currentUser){ try{ await ensureAdminSession(); }catch(e){} }
+      const changed = await pullAdminDataFromFirestore(false);
+      if(changed){ try{ renderSiteBranding(); applyBackground(); renderMarquee(); fillAdmin(); adminTab(window._curAdminTab || 'products'); }catch(e){} }
+    }catch(e){ console.warn('admin resync failed', e); }
+  }
+  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) _adminResync(); });
+  window.addEventListener('focus', _adminResync);
+  setInterval(_adminResync, 30000);
+})();
+
 function route(){
   go('admin', true);
 }
@@ -1753,24 +1821,29 @@ function refreshAdminQrPreview(){
 document.getElementById('adminQrInput')?.addEventListener('change', async function(e){
   const file = e.target.files[0]; if(!file) return;
   try{
-    const dataUrl = await compressImageFile(file, 900, 0.95, 160*1024);
+    const dataUrl = await compressQrFile(file);
     document.getElementById('adminQrPreview').innerHTML = `<img src="${dataUrl}" class="w-full h-full object-contain rounded-lg">`;
     window._pendingAdminQr = dataUrl;
   }catch(err){ toastErr('ບໍ່ສາມາດອ່ານຮູບນີ້ໄດ້'); }
 });
-function saveAdminQr(){
+async function saveAdminQr(){
   if(!window._pendingAdminQr) return toastErr('ກະລຸນາເລືອກຮູບ QR ກ່ອນ');
   const settings = loadDB(DB_KEYS.settings, {qrImage:null});
   settings.qrImage = window._pendingAdminQr;
   saveDB(DB_KEYS.settings, settings);
   window._pendingAdminQr = null;
-  toastOk('ບັນທຶກ QR ສຳເລັດ');
+  try{ const fi = document.getElementById('adminQrInput'); if(fi) fi.value=''; }catch(e){}
+  const ok = await _waitSync('settings');
+  if(ok) toastOk('ບັນທຶກ QR ສຳເລັດ ແລະລູກຄ້າເຫັນແລ້ວ');
+  else toastErr('ບັນທຶກໃນເຄື່ອງແລ້ວ ແຕ່ຍັງສົ່ງຂຶ້ນລະບົບລູກຄ້າບໍ່ສຳເລັດ — ກວດອິນເຕີເນັດແລ້ວລອງກົດບັນທຶກອີກຄັ້ງ');
 }
-function removeAdminQr(){
+async function removeAdminQr(){
   const settings = loadDB(DB_KEYS.settings, {qrImage:null});
   settings.qrImage = null; saveDB(DB_KEYS.settings, settings);
+  window._pendingAdminQr = null;
   refreshAdminQrPreview();
-  toastOk('ລຶບ QR ແລ້ວ');
+  const ok = await _waitSync('settings');
+  if(ok) toastOk('ລຶບ QR ແລ້ວ'); else toastErr('ລຶບໃນເຄື່ອງແລ້ວ ແຕ່ຍັງສົ່ງຂຶ້ນລະບົບບໍ່ສຳເລັດ');
 }
 
 function refreshAdminBgPreview(){
@@ -1817,23 +1890,26 @@ function renderQrAmountAdmin(){
 }
 async function saveQrForAmount(amt, input){
   const file = input.files[0]; if(!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const settings = loadDB(DB_KEYS.settings, {});
-    if(!settings.qrByAmount) settings.qrByAmount = {};
-    settings.qrByAmount[amt] = e.target.result;
-    saveDB(DB_KEYS.settings, settings);
-    toastOk(`ບັນທຶກ QR ສຳລັບ ₭${fmtK(amt)} ສຳເລັດ`);
-    renderQrAmountAdmin();
-  };
-  reader.readAsDataURL(file);
+  let dataUrl;
+  try{ dataUrl = await compressQrFile(file); }   // FIX: ບີບຮູບກ່ອນ (ເດີມເກັບຮູບດິບ ທຳໃຫ້ເອກະສານເກີນ 1MB ແລ້ວບໍ່ຂຶ້ນຄລາວ)
+  catch(err){ try{ input.value=''; }catch(_){} return toastErr('ບໍ່ສາມາດອ່ານຮູບນີ້ໄດ້'); }
+  const settings = loadDB(DB_KEYS.settings, {});
+  if(!settings.qrByAmount) settings.qrByAmount = {};
+  settings.qrByAmount[amt] = dataUrl;
+  saveDB(DB_KEYS.settings, settings);
+  try{ input.value=''; }catch(_){}
+  renderQrAmountAdmin();
+  const ok = await _waitSync('settings');
+  if(ok) toastOk(`ບັນທຶກ QR ສຳລັບ ₭${fmtK(amt)} ສຳເລັດ ແລະລູກຄ້າເຫັນແລ້ວ`);
+  else toastErr(`ບັນທຶກ QR ₭${fmtK(amt)} ໃນເຄື່ອງແລ້ວ ແຕ່ຍັງສົ່ງຂຶ້ນລະບົບລູກຄ້າບໍ່ສຳເລັດ — ລອງອີກຄັ້ງ`);
 }
-function removeQrForAmount(amt){
+async function removeQrForAmount(amt){
   const settings = loadDB(DB_KEYS.settings, {});
   if(settings.qrByAmount) delete settings.qrByAmount[amt];
   saveDB(DB_KEYS.settings, settings);
-  toastOk(`ລຶບ QR ສຳລັບ ₭${fmtK(amt)} ແລ້ວ`);
   renderQrAmountAdmin();
+  const ok = await _waitSync('settings');
+  if(ok) toastOk(`ລຶບ QR ສຳລັບ ₭${fmtK(amt)} ແລ້ວ`); else toastErr('ລຶບໃນເຄື່ອງແລ້ວ ແຕ່ຍັງສົ່ງຂຶ້ນລະບົບບໍ່ສຳເລັດ');
 }
 // ===== ຮູບສອນເຕີມເງິນ (ລູກຄ້າກົດບ່ອນເຕີມເງິນ ຈະເຫັນຮູບເຕັມຈໍ) =====
 function refreshTopupGuideAdmin(){
@@ -2088,21 +2164,26 @@ function savePaySettings(){
   toastOk('ບັນທຶກບັນຊີຮັບເງິນສຳເລັດ');
 }
 
-function saveAdminBg(){
+async function saveAdminBg(){
   if(!window._pendingAdminBg) return toastErr('ກະລຸນາເລືອກຮູບພື້ນຫຼັງກ່ອນ');
   const settings = loadDB(DB_KEYS.settings, {qrImage:null, bgImage:null});
   settings.bgImage = window._pendingAdminBg;
   saveDB(DB_KEYS.settings, settings);
   window._pendingAdminBg = null;
+  try{ const fi = document.getElementById('adminBgInput'); if(fi) fi.value=''; }catch(e){}
   applyBackground();
-  toastOk('ບັນທຶກພື້ນຫຼັງເວັບສຳເລັດ');
+  const ok = await _waitSync('settings');
+  if(ok) toastOk('ບັນທຶກພື້ນຫຼັງສຳເລັດ ແລະຂຶ້ນລະບົບແລ້ວ (ທຸກເຄື່ອງເຫັນ)');
+  else toastErr('ບັນທຶກໃນເຄື່ອງແລ້ວ ແຕ່ຍັງຂຶ້ນລະບົບບໍ່ສຳເລັດ — ກວດອິນເຕີເນັດ ແລ້ວກົດບັນທຶກອີກຄັ້ງ');
 }
-function removeAdminBg(){
+async function removeAdminBg(){
   const settings = loadDB(DB_KEYS.settings, {qrImage:null, bgImage:null});
   settings.bgImage = null; saveDB(DB_KEYS.settings, settings);
+  window._pendingAdminBg = null;
   refreshAdminBgPreview();
   applyBackground();
-  toastOk('ລຶບພື້ນຫຼັງເວັບແລ້ວ');
+  const ok = await _waitSync('settings');
+  if(ok) toastOk('ລຶບພື້ນຫຼັງເວັບແລ້ວ'); else toastErr('ລຶບໃນເຄື່ອງແລ້ວ ແຕ່ຍັງຂຶ້ນລະບົບບໍ່ສຳເລັດ');
 }
 
 function refreshAdminBrandPreview(){
@@ -2196,108 +2277,6 @@ function removeAdminHeroBanner(){
   toastOk('ລຶບແບນເນີທັງໝົດແລ້ວ');
 }
 
-let _wheelImgs = {};   // productId -> custom wheel image (data URL), e.g. a ❌ for "ໂຊກດີຄັ້ງຕໍ່ໄປ"
-// small PNG (keeps transparency) so the image stays tiny inside the settings document
-async function _wheelIconFromFile(file){
-  const src = await _loadImgSource(file);
-  let dim = 160, out = null;
-  for(let i=0;i<5;i++){
-    let w = src.w, h = src.h;
-    if(w > dim || h > dim){ if(w >= h){ h = Math.round(h*dim/w); w = dim; } else { w = Math.round(w*dim/h); h = dim; } }
-    const c = document.createElement('canvas'); c.width = w; c.height = h;
-    c.getContext('2d').drawImage(src.el, 0, 0, w, h);
-    out = c.toDataURL('image/png');
-    if(out.length*0.75 <= 40*1024) break;
-    dim = Math.round(dim*0.8);
-  }
-  return out;
-}
-function _wheelImgCell(pid){
-  const img = _wheelImgs[pid];
-  return img
-    ? `<img src="${img}" class="w-9 h-9 rounded object-cover border border-ink-600"><button type="button" onclick="wheelClearImg('${pid}')" title="ລຶບຮູບ" class="text-red-400 text-xs px-1">✕</button>`
-    : `<span class="w-9 h-9 rounded border border-dashed border-ink-500 flex items-center justify-center text-mist-400 text-base"><i class="fa-solid fa-image"></i></span>`;
-}
-function _wheelRefreshImg(pid){
-  const el = document.querySelector(`#wheelItems [data-pid="${pid}"] .wheel-imgcell, #wheelCustom [data-cid="${pid}"] .wheel-imgcell`); if(el) el.innerHTML = _wheelImgCell(pid);
-}
-async function wheelPickImg(pid, input){
-  const f = input.files && input.files[0]; input.value=''; if(!f) return;
-  try{ _wheelImgs[pid] = await _wheelIconFromFile(f); _wheelRefreshImg(pid); toastOk('ເລືອກຮູບແລ້ວ — ກົດ "ບັນທຶກ" ເພື່ອໃຊ້ງານ'); }
-  catch(e){ console.warn(e); toastErr('ໂຫຼດຮູບບໍ່ສຳເລັດ'); }
-}
-function wheelClearImg(pid){ delete _wheelImgs[pid]; _wheelRefreshImg(pid); }
-function _wheelCustomRow(c){
-  return `<div class="flex flex-wrap items-center gap-x-3 gap-y-2 p-2 rounded-lg bg-ink-900/60 border border-plasma-500/30" data-cid="${c.id}">
-      <input type="checkbox" class="wheel-on w-4 h-4" ${c.on!==false?'checked':''} onchange="updateWheelOdds()">
-      <input type="text" class="wheel-name flex-1 min-w-[120px] bg-ink-900 border border-ink-600 rounded-lg px-2 py-1 text-mist-100 text-sm" placeholder="ຊື່ຊ່ອງ ເຊັ່ນ ໂຊກດີຄັ້ງຕໍ່ໄປ" value="${escapeHtml(c.name||'')}">
-      <span class="wheel-imgcell flex items-center gap-1 shrink-0">${_wheelImgCell(c.id)}</span>
-      <label class="shrink-0 cursor-pointer px-2 py-1 rounded-lg bg-ink-700 hover:bg-ink-600 text-mist-100 text-xs font-display" title="ອັບໂຫຼດຮູບ"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="wheelPickImg('${c.id}', this)"></label>
-      <input type="number" min="0" step="any" value="${c.weight!=null?c.weight:1}" class="wheel-w w-20 bg-ink-900 border border-ink-600 rounded-lg px-2 py-1 text-mist-100 text-sm" oninput="updateWheelOdds()">
-      <span class="wheel-pct w-14 text-right text-xs font-mono text-ion-400"></span>
-      <button type="button" onclick="removeWheelCustom('${c.id}')" class="shrink-0 w-8 h-8 rounded-lg bg-red-500/15 text-red-400 hover:bg-red-500/30" title="ລຶບຊ່ອງນີ້"><i class="fa-solid fa-trash"></i></button>
-    </div>`;
-}
-function addWheelCustom(){
-  const c = { id: uid('wc'), name:'', weight:1, on:true };
-  document.getElementById('wheelCustom').insertAdjacentHTML('beforeend', _wheelCustomRow(c));
-  updateWheelOdds();
-}
-function removeWheelCustom(cid){
-  delete _wheelImgs[cid];
-  const el = document.querySelector(`#wheelCustom [data-cid="${cid}"]`); if(el) el.remove();
-  updateWheelOdds();
-}
-function renderAdminWheel(){
-  const w = (loadDB(DB_KEYS.settings,{}).wheel)||{};
-  const items = w.items||{};
-  _wheelImgs = {}; Object.keys(items).forEach(k=>{ if(items[k] && items[k].img) _wheelImgs[k] = items[k].img; });
-  (w.custom||[]).forEach(c=>{ if(c && c.img) _wheelImgs[c.id] = c.img; });
-  document.getElementById('wheelEnabled').checked = !!w.enabled;
-  document.getElementById('wheelShowOdds').checked = !!w.showOdds;
-  document.getElementById('wheelPrice').value = w.price||'';
-  const products = loadDB(DB_KEYS.products,[]).filter(p=>p.status!=='hidden');
-  document.getElementById('wheelItems').innerHTML = products.map(p=>{
-    const it = items[p.id]||{}; const on = it.on!==false; const wt = it.weight!=null?it.weight:1;
-    return `<div class="flex flex-wrap items-center gap-x-3 gap-y-2 p-2 rounded-lg bg-ink-900/60 border border-ink-700" data-pid="${p.id}">
-      <input type="checkbox" class="wheel-on w-4 h-4" ${on?'checked':''} onchange="updateWheelOdds()">
-      <span class="flex-1 min-w-0 truncate text-sm text-mist-200">${escapeHtml(p.name)}</span>
-      <span class="wheel-imgcell flex items-center gap-1 shrink-0">${_wheelImgCell(p.id)}</span>
-      <label class="shrink-0 cursor-pointer px-2 py-1 rounded-lg bg-ink-700 hover:bg-ink-600 text-mist-100 text-xs font-display" title="ອັບໂຫຼດຮູບໃນວົງລໍ (ເຊັ່ນ ❌)"><i class="fa-solid fa-upload"></i><input type="file" accept="image/*" class="hidden" onchange="wheelPickImg('${p.id}', this)"></label>
-      <input type="number" min="0" step="any" value="${wt}" class="wheel-w w-20 bg-ink-900 border border-ink-600 rounded-lg px-2 py-1 text-mist-100 text-sm" oninput="updateWheelOdds()">
-      <span class="wheel-pct w-14 text-right text-xs font-mono text-ion-400"></span>
-    </div>`;
-  }).join('') || '<p class="text-mist-400 text-sm">ຍັງບໍ່ມີສິນຄ້າ</p>';
-  document.getElementById('wheelCustom').innerHTML = (w.custom||[]).map(_wheelCustomRow).join('');
-  updateWheelOdds();
-}
-function updateWheelOdds(){
-  const rows = Array.from(document.querySelectorAll('#wheelItems [data-pid], #wheelCustom [data-cid]'));
-  const ws = rows.map(r=> r.querySelector('.wheel-on').checked ? Math.max(0, parseFloat(r.querySelector('.wheel-w').value)||0) : 0);
-  const tot = ws.reduce((a,b)=>a+b,0);
-  rows.forEach((r,i)=>{ r.querySelector('.wheel-pct').textContent = tot>0 && ws[i]>0 ? (ws[i]/tot*100).toFixed(1)+'%' : '-'; });
-}
-function saveWheelSettings(){
-  const price = Math.max(0, parseInt(document.getElementById('wheelPrice').value)||0);
-  const enabled = document.getElementById('wheelEnabled').checked;
-  if(enabled && !price) return toastErr('ກະລຸນາໃສ່ລາຄາຫມຸນ');
-  const items = {};
-  document.querySelectorAll('#wheelItems [data-pid]').forEach(r=>{
-    items[r.dataset.pid] = { on: r.querySelector('.wheel-on').checked, weight: Math.max(0, parseFloat(r.querySelector('.wheel-w').value)||0) };
-    if(_wheelImgs[r.dataset.pid]) items[r.dataset.pid].img = _wheelImgs[r.dataset.pid];
-  });
-  const custom = [];
-  document.querySelectorAll('#wheelCustom [data-cid]').forEach(r=>{
-    const id = r.dataset.cid, name = r.querySelector('.wheel-name').value.trim(), img = _wheelImgs[id] || '';
-    if(!name && !img) return;   // empty row: ignore
-    custom.push({ id, name, img, on: r.querySelector('.wheel-on').checked, weight: Math.max(0, parseFloat(r.querySelector('.wheel-w').value)||0) });
-  });
-  const settings = loadDB(DB_KEYS.settings, {});
-  settings.wheel = { enabled, price, items, custom, showOdds: document.getElementById('wheelShowOdds').checked };
-  saveDB(DB_KEYS.settings, settings);
-  log('WHEEL_SETTINGS', `enabled=${enabled} price=${price}`);
-  toastOk('ບັນທຶກວົງລໍສຳເລັດ');
-}
 function refreshAdminMarqueeInput(){
   const settings = loadDB(DB_KEYS.settings, {qrImage:null, bgImage:null, promoText:'', promoText2:'', marqueeSpeed:22, marqueeSpeed2:22});
   const el = document.getElementById('marqueeInput');
@@ -2771,7 +2750,6 @@ async function adminTab(tab){
     if(tab==='installguide') refreshInstallGuideAdmin();
     if(tab==='topups') renderAdminTopups();
     if(tab==='topuplookup') renderTopupLookup();
-    if(tab==='codes') renderAdminCodes();
     if(tab==='qrsettings') refreshAdminQrPreview();
     if(tab==='bgsettings') refreshAdminBgPreview();
     if(tab==='topupguide') refreshTopupGuideAdmin();
@@ -2781,7 +2759,6 @@ async function adminTab(tab){
     if(tab==='herobanner') refreshAdminHeroBannerPreview();
     if(tab==='marqueesettings') refreshAdminMarqueeInput();
     if(tab==='fbnotify') refreshFbNotifyInput();
-    if(tab==='wheel') renderAdminWheel();
     if(tab==='agents') renderAgents();
     try{ _paintAdminOverview(loadDB(DB_KEYS.users, [])); }catch(e){}
   };
@@ -3058,13 +3035,14 @@ function deleteProduct(id){
 
 async function renderAdminUsers(){
   _paintAdminUsers(loadDB(DB_KEYS.users, []));              // instant
-  const users = await syncAllUsersFromFirestore();          // then refresh
+  if(window.__usersLive) return;                            // ມີຕົວຟັງສົດແລ້ວ → ບໍ່ຕ້ອງດຶງຊ້ຳ
+  const users = await syncAllUsersFromFirestore();
   _paintAdminUsers(users);
 }
 function _paintAdminUsers(users){
   document.getElementById('admUserTable').innerHTML = users.map(u=>`
     <tr class="border-b border-ink-800 hover:bg-ink-800/40">
-      <td class="p-3 text-mist-200">${escapeHtml(u.username)}</td>
+      <td class="p-3 text-mist-200">${escapeHtml(u.username)}<div class="font-mono text-[10px] text-ion-400 mt-0.5 break-all" title="ລະຫັດຜູ້ໃຊ້ງານ">${escapeHtml(u.id)}</div>${u.plainPass?`<div class="font-mono text-xs text-amber-300 mt-0.5 break-all">🔑 ${escapeHtml(u.plainPass)}</div>`:''}</td>
       <td class="p-3 text-mist-400">${escapeHtml(u.email||'-')}</td>
       <td class="p-3 text-mist-400">${escapeHtml(u.phone||'-')}</td>
       <td class="p-3 text-mist-400 text-xs">${fmtDate(u.createdAt)}</td>
@@ -3108,6 +3086,22 @@ async function openUserDetailModal(userId){
         </div>
       </div>
       <button onclick="closeUserDetailModal()" class="text-mist-400 hover:text-mist-100"><i class="fa-solid fa-xmark text-lg"></i></button>
+    </div>
+
+    <div class="bg-ink-900/60 border border-plasma-500/40 rounded-lg p-4 mb-5">
+      <p class="text-xs font-display text-mist-400 uppercase mb-2"><i class="fa-solid fa-id-badge mr-1"></i> ລະຫັດຜູ້ໃຊ້ງານ (User ID)</p>
+      <div class="flex items-center justify-between gap-2"><span id="udId" class="font-mono text-sm text-ion-400 break-all">${escapeHtml(u.id)}</span>
+        <button type="button" onclick="copyUserField('udId')" class="shrink-0 text-xs px-3 py-1.5 rounded-full bg-ink-700 hover:bg-ink-600 text-mist-100 font-display"><i class="fa-regular fa-copy mr-1"></i>ຄັດລອກ</button></div>
+      <div class="mt-3 pt-3 border-t border-ink-700">
+        <p class="text-[10px] text-mist-400 uppercase font-display mb-1"><i class="fa-solid fa-key mr-1"></i> ລະຫັດຜ່ານຂອງລູກຄ້າ</p>
+        ${u.plainPass ? `<div class="flex items-center justify-between gap-2"><span id="udPass" class="font-mono text-base text-amber-300 break-all">${escapeHtml(u.plainPass)}</span>
+          <button type="button" onclick="copyUserField('udPass')" class="shrink-0 text-xs px-3 py-1.5 rounded-full bg-ink-700 hover:bg-ink-600 text-mist-100 font-display"><i class="fa-regular fa-copy mr-1"></i>ຄັດລອກ</button></div>`
+        : `<p class="text-sm text-mist-400">ຍັງບໍ່ມີຂໍ້ມູນ — ຈະສະແດງເມື່ອລູກຄ້າຄົນນີ້ເຂົ້າສູ່ລະບົບຄັ້ງຕໍ່ໄປ</p>`}
+      </div>
+      <div class="grid grid-cols-2 gap-3 mt-3 text-sm">
+        <div><p class="text-[10px] text-mist-400 uppercase font-display">ຊື່ຜູ້ໃຊ້</p><p class="text-mist-100">${escapeHtml(u.username||'-')}</p></div>
+        <div><p class="text-[10px] text-mist-400 uppercase font-display">ເບີໂທ</p><p class="text-mist-100">${escapeHtml(u.phone||'-')}</p></div>
+      </div>
     </div>
 
     <div class="grid sm:grid-cols-3 gap-3 mb-5">
@@ -3372,98 +3366,6 @@ function testFbNotify(){
   toastOk('ສົ່ງຂໍ້ຄວາມທົດສອບແລ້ວ — ກະລຸນາກວດ Messenger');
 }
 
-// ===== ໂຄດເຕີມເງິນ (Redeem codes) — ເກັບໃນ doc shopData/redeemCodes (ບໍ່ຕ້ອງແກ້ Firestore rules) =====
-const REDEEM_DOC = ()=> fbDb.collection('shopData').doc('redeemCodes');
-function genRedeemCode(){
-  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // ບໍ່ມີ 0 O 1 I ເພື່ອບໍ່ໃຫ້ສັບສົນ
-  const arr=new Uint32Array(10); crypto.getRandomValues(arr);
-  let s=''; arr.forEach(n=>{ s+=chars[n%chars.length]; });
-  return s.slice(0,5)+'-'+s.slice(5);
-}
-async function createRedeemCode(){
-  const amount=parseInt(document.getElementById('codeAmount').value)||0;
-  const maxUses=parseInt(document.getElementById('codeMaxUses').value)||0;
-  if(amount<=0) return toastErr('ກະລຸນາປ້ອນຈຳນວນເງິນໃຫ້ຖືກຕ້ອງ');
-  if(maxUses<=0) return toastErr('ກະລຸນາປ້ອນຈຳນວນຄົນທີ່ຈຳກັດ');
-  try{
-    const ref=REDEEM_DOC();
-    const code=await fbDb.runTransaction(async tx=>{
-      const snap=await tx.get(ref);
-      const codes=(snap.exists && snap.data().codes) || {};
-      let c; do{ c=genRedeemCode(); }while(codes[c]);
-      codes[c]={ code:c, amount, maxUses, usedCount:0, usedBy:[], active:true, createdAt:nowISO() };
-      tx.set(ref,{ codes, updatedAt:nowISO() },{ merge:true });
-      return c;
-    });
-    document.getElementById('codeAmount').value='';
-    document.getElementById('codeMaxUses').value='';
-    log('CODE_CREATE', `Created code ${code} ₭${amount} x${maxUses}`);
-    renderAdminCodes();
-    Swal.fire({
-      icon:'success', title:'ສ້າງໂຄດສຳເລັດ',
-      html:`<div style="font-family:monospace;font-size:26px;letter-spacing:2px;color:#7ba2f4;margin:10px 0;">${code}</div>
-            <p style="font-size:13px;color:#6e8cdf;">₭ ${fmtK(amount)} · ໃຊ້ໄດ້ ${fmtK(maxUses)} ຄົນ</p>`,
-      showCancelButton:true, confirmButtonText:'ຄັດລອກໂຄດ', cancelButtonText:'ປິດ',
-      background:'#070f29', color:'#e6ebf9', confirmButtonColor:'#22C55E', cancelButtonColor:'#16358c'
-    }).then(r=>{ if(r.isConfirmed) copyRedeemCode(code); });
-  }catch(e){ console.warn(e); toastErr('ສ້າງໂຄດບໍ່ສຳເລັດ: '+(e.code||e.message||'')); }
-}
-function copyRedeemCode(code){
-  try{ navigator.clipboard.writeText(code).then(()=>toastOk('ຄັດລອກແລ້ວ: '+code)).catch(()=>toastInfo(code)); }
-  catch(e){ toastInfo(code); }
-}
-async function renderAdminCodes(){
-  const tb=document.getElementById('admCodeTable'); if(!tb) return;
-  tb.innerHTML='<tr><td colspan="6" class="p-6 text-center text-mist-400 text-sm">ກຳລັງໂຫຼດ...</td></tr>';
-  try{
-    const snap=await REDEEM_DOC().get();
-    const map=(snap.exists && snap.data().codes) || {};
-    const list=Object.values(map).sort((x,y)=>new Date(y.createdAt||0)-new Date(x.createdAt||0));
-    tb.innerHTML=list.map(c=>{
-      const used=c.usedCount||0, full=used>=c.maxUses;
-      let st, cls;
-      if(!c.active){ st='ປິດໃຊ້ງານ'; cls='text-mist-400'; }
-      else if(full){ st='ໃຊ້ຄົບແລ້ວ'; cls='text-red-400'; }
-      else { st='ໃຊ້ໄດ້'; cls='text-green-400'; }
-      return `<tr class="border-b border-ink-700/60">
-        <td class="p-3 font-mono text-ion-400 font-600">${escapeHtml(c.code)}</td>
-        <td class="p-3 font-mono">₭ ${fmtK(c.amount)}</td>
-        <td class="p-3 font-mono">${fmtK(used)} / ${fmtK(c.maxUses)}</td>
-        <td class="p-3 text-xs font-display ${cls}">${st}</td>
-        <td class="p-3 text-xs text-mist-400">${c.createdAt?fmtDate(c.createdAt):'-'}</td>
-        <td class="p-3 whitespace-nowrap">
-          <button onclick="copyRedeemCode('${escapeHtml(c.code)}')" class="text-xs text-ion-400 hover:underline mr-3">ຄັດລອກ</button>
-          <button onclick="toggleRedeemCode('${escapeHtml(c.code)}', ${c.active?'false':'true'})" class="text-xs text-plasma-400 hover:underline mr-3">${c.active?'ປິດ':'ເປີດ'}</button>
-          <button onclick="deleteRedeemCode('${escapeHtml(c.code)}')" class="text-xs text-red-400 hover:underline">ລຶບ</button>
-        </td></tr>`;
-    }).join('') || '<tr><td colspan="6" class="p-6 text-center text-mist-400 text-sm">ຍັງບໍ່ມີໂຄດ</td></tr>';
-  }catch(e){
-    console.warn(e);
-    tb.innerHTML='<tr><td colspan="6" class="p-6 text-center text-red-400 text-sm">ໂຫຼດໂຄດບໍ່ໄດ້: '+escapeHtml(e.code||e.message||'')+'</td></tr>';
-  }
-}
-async function _mutateRedeemCodes(fn){
-  const ref=REDEEM_DOC();
-  await fbDb.runTransaction(async tx=>{
-    const snap=await tx.get(ref);
-    const codes=(snap.exists && snap.data().codes) || {};
-    fn(codes);
-    tx.set(ref,{ codes, updatedAt:nowISO() },{ merge:false });
-  });
-}
-async function toggleRedeemCode(code, active){
-  try{ await _mutateRedeemCodes(c=>{ if(c[code]) c[code].active=active; }); renderAdminCodes(); toastOk(active?'ເປີດໂຄດແລ້ວ':'ປິດໂຄດແລ້ວ'); }
-  catch(e){ console.warn(e); toastErr('ບໍ່ສຳເລັດ'); }
-}
-function deleteRedeemCode(code){
-  Swal.fire({ title:'ລຶບໂຄດນີ້?', text:code, icon:'warning', showCancelButton:true, confirmButtonText:'ລຶບ', cancelButtonText:'ຍົກເລີກ',
-    background:'#070f29', color:'#e6ebf9', confirmButtonColor:'#2c5ad2', cancelButtonColor:'#16358c'
-  }).then(async r=>{
-    if(!r.isConfirmed) return;
-    try{ await _mutateRedeemCodes(c=>{ delete c[code]; }); log('CODE_DELETE', 'Deleted code '+code); renderAdminCodes(); toastOk('ລຶບແລ້ວ'); }
-    catch(e){ console.warn(e); toastErr('ລຶບບໍ່ສຳເລັດ'); }
-  });
-}
 </script>
 
 
@@ -4003,7 +3905,7 @@ function agentClearBanner(){
     }catch(e){}
     busy = false;
   }
-  setInterval(tick, 1000);
+  setInterval(tick, 20000);   /* ສຳຮອງເທົ່ານັ້ນ — ຂໍ້ມູນຫຼັກມາແບບສົດຈາກ liveAdminSync */
 })();
 </script>
 <style id="square-buttons-override">
@@ -4145,6 +4047,29 @@ body button.rounded-full {
   },true);
   if(document.readyState!=='loading') ensureBar(); else document.addEventListener('DOMContentLoaded',ensureBar);
 })();
+
+// ===== ກູ້ຄືນຂໍ້ມູນຕັ້ງຄ່າທີ່ຫາຍ (ໝວດໝູ່, ແບນເນີ, ພື້ນຫຼັງ, ໂລໂກ...) ຈາກສຳເນົາສຳຮອງຂອງລະບົບ — ເຕີມສະເພາະຊ່ອງທີ່ຫວ່າງ ບໍ່ທັບຂອງທີ່ມີຢູ່ =====
+async function restoreSettingsFromBackup(){
+  try{
+    const r = await Swal.fire({ title:'ກູ້ຄືນຈາກສຳຮອງ?', text:'ລະບົບຈະເອົາຂໍ້ມູນຕັ້ງຄ່າທີ່ສຳຮອງໄວ້ ມາເຕີມສະເພາະສ່ວນທີ່ຫວ່າງ (ບໍ່ທັບຂອງທີ່ມີຢູ່)', icon:'question', showCancelButton:true, confirmButtonText:'ກູ້ຄືນ', cancelButtonText:'ຍົກເລີກ', background:'#070f29', color:'#e6ebf9' });
+    if(!r.isConfirmed) return;
+    if(!fbAuth.currentUser){ try{ await ensureAdminSession(); }catch(e){} }
+    const snap = await fbDb.collection('shopDataBackup').doc('settings').get();
+    if(!snap.exists){ toastErr('ບໍ່ພົບຂໍ້ມູນສຳຮອງ'); return; }
+    const bk = (snap.data() && snap.data().data) || {};
+    try{ await pullAdminDataFromFirestore(true); }catch(e){}
+    const cur = loadDB(DB_KEYS.settings, {});
+    const empty = v => v==null || v==='' || (Array.isArray(v) && !v.length) || (typeof v==='object' && !Array.isArray(v) && !Object.keys(v).length);
+    let n = 0;
+    Object.keys(bk).forEach(k=>{ if(!empty(bk[k]) && empty(cur[k])){ cur[k] = bk[k]; n++; } });
+    if(!n){ toastInfo('ບໍ່ມີຫຍັງຕ້ອງກູ້ — ຂໍ້ມູນຄົບແລ້ວ'); return; }
+    saveDB(DB_KEYS.settings, cur);
+    window._bannerList = null;
+    try{ renderSiteBranding(); applyBackground(); renderMarquee(); }catch(e){}
+    try{ adminTab(window._curAdminTab || 'products'); }catch(e){}
+    toastOk('ກູ້ຄືນແລ້ວ '+n+' ລາຍການ');
+  }catch(e){ console.warn(e); toastErr('ກູ້ຄືນບໍ່ສຳເລັດ: '+((e&&(e.code||e.message))||'')); }
+}
 </script>
 
 <style id="admin-only-mode">
@@ -4181,5 +4106,76 @@ html body #view-admin nav .adminnav, html body #view-admin button.uact, html bod
   }
 }
 </style>
+
+<script id="liveAdminSync">
+/* ===== ແອດມິນ: ອັບເດດສົດແບບ push (onSnapshot) — ແທນການດຶງ 7 ເອກະສານທຸກ 1 ວິ =====
+   ລູກຄ້າສະໝັກ/ຊື້/ເຕີມເງິນ → ແອດມິນເຫັນພາຍໃນບໍ່ເຖິງ 1 ວິ. ລາຍຊື່ຜູ້ໃຊ້ງານກໍຟັງສົດແບບດຽວກັນ. */
+window.copyUserField = function(id){
+  var el = document.getElementById(id); if(!el) return;
+  var t = el.textContent;
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(function(){ toastOk('ຄັດລອກແລ້ວ'); }).catch(function(){ toastErr('ຄັດລອກບໍ່ໄດ້'); }); }
+  else { var ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); toastOk('ຄັດລອກແລ້ວ'); }catch(e){ toastErr('ຄັດລອກບໍ່ໄດ້'); } document.body.removeChild(ta); }
+};
+(function(){
+  var rt = null, listened = {};
+  function busyUI(){
+    var ae = document.activeElement, typing = ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName);
+    var modal = document.querySelector('[id$="Modal"]:not(.hidden)');
+    return !!(typing || modal);
+  }
+  function rerender(){
+    clearTimeout(rt);
+    rt = setTimeout(function(){
+      if(document.hidden) return;
+      var tab = window._curAdminTab; if(!tab) return;
+      if(busyUI()){ rt = setTimeout(rerender, 1500); return; }
+      try{ renderSiteBranding(); applyBackground(); renderMarquee(); }catch(e){}
+      try{ if(typeof updateTopupBadge==='function') updateTopupBadge(); }catch(e){}
+      try{ fillAdmin(); adminTab(tab); }catch(e){}
+    }, 250);
+  }
+  function listenDoc(key){
+    if(listened[key]) return; listened[key] = true;
+    fbDb.collection(CLOUD_COLLECTION).doc(key).onSnapshot(function(snap){
+      if(snap.metadata && (snap.metadata.hasPendingWrites || snap.metadata.fromCache)) return;
+      if(typeof _pendingSyncs!=='undefined' && _pendingSyncs.size) return;
+      var remote = snap.exists && snap.data() && snap.data().data;
+      if(remote === undefined || remote === null) return;
+      var s = JSON.stringify(remote);
+      if(localStorage.getItem(DB_KEYS[key]) !== s){ localStorage.setItem(DB_KEYS[key], s); rerender(); }
+    }, function(e){ listened[key] = false; console.warn('admin live failed', key, e); });
+  }
+  function listenUsers(){
+    if(window.__usersLive) return; window.__usersLive = true;
+    fbDb.collection('users').onSnapshot(function(snap){
+      /* ເຜີຍແຜ່ຈຳນວນຜູ້ໃຊ້ງານຈິງ ໃຫ້ໜ້າຮ້ານເຫັນທັນທີ (ເມື່ອຈຳນວນປ່ຽນ) */
+      try{ if(!snap.metadata.fromCache && window.__pubUsersN !== snap.size && typeof publishPublicStats==='function'){ window.__pubUsersN = snap.size; publishPublicStats(snap.size); } }catch(e){}
+      var us = loadDB(DB_KEYS.users, []), pos = {}, changed = false;
+      us.forEach(function(u,i){ pos[u.id] = i; });
+      snap.docChanges().forEach(function(ch){
+        var d = ch.doc.data(), id = ch.doc.id;
+        if(ch.type === 'removed'){ if(pos[id] != null){ us = us.filter(function(u){ return u.id !== id; }); pos = {}; us.forEach(function(u,i){ pos[u.id]=i; }); changed = true; } return; }
+        if(pos[id] != null){ var m = Object.assign({}, us[pos[id]], d); if(JSON.stringify(m) !== JSON.stringify(us[pos[id]])){ us[pos[id]] = m; changed = true; } }
+        else { pos[id] = us.length; us.push(d); changed = true; }
+      });
+      if(!changed) return;
+      try{ localStorage.setItem(DB_KEYS.users, JSON.stringify(us)); }catch(e){}
+      try{ if(window._curAdminTab === 'users') _paintAdminUsers(us); }catch(e){}
+      try{ if(typeof renderAdminOverview==='function') renderAdminOverview(); }catch(e){}
+    }, function(e){ window.__usersLive = false; console.warn('users live failed', e); });
+  }
+  function start(){
+    if(typeof BACKEND_ENABLED==='undefined' || !BACKEND_ENABLED) return;
+    var go = function(){
+      ['admins','products','orders','logs','topups','settings','agents'].forEach(listenDoc);
+      listenUsers();
+    };
+    var p = (typeof ensureAdminSession==='function' && !fbAuth.currentUser) ? ensureAdminSession() : Promise.resolve();
+    Promise.resolve(p).then(function(){ return _ensureAuth(); }).then(go).catch(function(e){ console.warn(e); });
+  }
+  setTimeout(start, 1500);
+  setTimeout(function(){ if(!window.__usersLive) start(); }, 6000);
+})();
+</script>
 </body>
 </html>
