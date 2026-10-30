@@ -923,6 +923,34 @@ async function publishPublicStats(count){
     await fbDb.collection('shopData').doc('publicStats').set({ users: Number(count)||0, updatedAt: new Date().toISOString() }, { merge:true });
   }catch(e){ console.warn('Could not publish public stats', e); }
 }
+// ===== ເຜີຍແຜ່ຍອດ "ຂາຍແລ້ວ" ລວມ ໃຫ້ລູກຄ້າທຸກຄົນເຫັນຄືກັນ =====
+// ແອດມິນເຫັນອໍເດີທັງໝົດ → ນັບຍອດຂາຍຕໍ່ສິນຄ້າ ແລ້ວຂຽນລົງ shopData/publicStats (ເອົາຄ່າສູງສຸດ ກັບຄ່າທີ່ລູກຄ້າບວກໄວ້ ບໍ່ນັບຊ້ຳ)
+let _soldSig = '';
+async function publishSoldStats(){
+  if(!BACKEND_ENABLED) return;
+  try{
+    if(!(typeof SESSION!=='undefined' && SESSION && SESSION.role==='admin')) return;
+    const orders = loadDB(DB_KEYS.orders, []);
+    const map = {}; let n = 0;
+    orders.forEach(o=>{ if(o && o.status==='completed' && o.productId){ map[o.productId] = (map[o.productId]||0) + 1; n++; } });
+    if(!n) return;                                  // ອໍເດີຍັງໂຫຼດບໍ່ຄົບ → ຢ່າຂຽນທັບ
+    const sig = JSON.stringify(map); if(sig === _soldSig) return;
+    if(!fbAuth.currentUser){ try{ await fbAuth.signInAnonymously(); }catch(e){} }
+    const ref = fbDb.collection('shopData').doc('publicStats');
+    const d = await ref.get(); const cur = (d.exists && d.data()) || {};
+    const curMap = (cur.soldBy && typeof cur.soldBy==='object') ? cur.soldBy : {};
+    const out = Object.assign({}, curMap); let changed = false;
+    Object.keys(map).forEach(k=>{ const v = Math.max(Number(curMap[k])||0, map[k]); if(v !== (Number(curMap[k])||0)) changed = true; out[k] = v; });
+    let tot = 0; Object.keys(out).forEach(k=>{ tot += Number(out[k])||0; });
+    tot = Math.max(tot, Number(cur.completedTotal)||0);
+    if(changed || tot !== (Number(cur.completedTotal)||0)){
+      await ref.set({ soldBy: out, completedTotal: tot, updatedAt: new Date().toISOString() }, { merge:true });
+    }
+    _soldSig = sig;
+  }catch(e){ console.warn('Could not publish sold stats', e); }
+}
+setTimeout(publishSoldStats, 8000);
+setInterval(publishSoldStats, 20000);
 async function readPublicUserCount(){
   if(!BACKEND_ENABLED) return null;
   try{
@@ -2856,9 +2884,13 @@ function renderAdminProducts(){
 }
 let _pfImages = [];
 let _pfSnapshot = {};
-function optAllPool(p){ return !!(p.options&&p.options.length&&p.options.every(o=>o.pool)); }
-function poolHasCodes(p){ return !!(p && p.options && p.options.some(o=>o.pool && (o.codes||[]).length>0)); }
-function syncProductStock(p){ if(!optAllPool(p)){ if(p.status==='sold' && poolHasCodes(p)) p.status='available'; return; } const t=p.options.reduce((n,o)=>n+((o.codes||[]).length),0); p.stock=t; if(t<=0 && p.status==='available') p.status='sold'; }
+let _pfQtySnap = {};
+let _pfHi = {};   // dataURL ນ້ອຍ -> id ຂອງຮູບຄວາມຄົມສູງ
+// ສະຕັອກຕໍ່ຕົວເລືອກ: ມີລະຫັດ(pool) → ນັບຈາກລະຫັດ; ບໍ່ມີ → ຕົວເລກ o.qty; ເວັ້ນວ່າງ = ບໍ່ຈຳກັດ (null)
+function optLeft(o){ if(!o) return null; if(o.pool) return (o.codes||[]).length; if(o.qty!==undefined && o.qty!==null && o.qty!=='') return Math.max(0, parseInt(o.qty)||0); return null; }
+function optAllPool(p){ return !!(p.options&&p.options.length&&p.options.every(o=>optLeft(o)!==null)); }
+function poolHasCodes(p){ return !!(p && p.options && p.options.some(o=>optLeft(o)!==null && optLeft(o)>0)); }
+function syncProductStock(p){ if(!optAllPool(p)){ if(p.status==='sold' && poolHasCodes(p)) p.status='available'; return; } const t=p.options.reduce((n,o)=>n+optLeft(o),0); p.stock=t; if(t<=0 && p.status==='available') p.status='sold'; }
 function updateOptStock(row){
   const n = Array.from(row.querySelectorAll('.opt-code-item')).filter(i=>i.value.trim()).length;
   const el = row.querySelector('.opt-stock-count'); if(el) el.textContent = `ສະຕັອກ: ${n}`;
@@ -2887,7 +2919,7 @@ function addCodeInput(row, value){
   updateOptStock(row);
   return inp;
 }
-function addOptionRow(label, price, codes){
+function addOptionRow(label, price, codes, qty){
   if(typeof codes === 'string') codes = codes ? [codes] : [];
   codes = codes || [];
   const row = document.createElement('div');
@@ -2901,6 +2933,11 @@ function addOptionRow(label, price, codes){
     <div class="flex items-center justify-between">
       <span class="text-[11px] text-mist-400">ຂໍ້ມູນທີ່ລູກຄ້າຈະໄດ້ຮັບ — ຂາຍອອກ 1 ຄັ້ງ ລະຫັດນັ້ນຫາຍໄປ</span>
       <span class="opt-stock-count text-xs font-mono text-ion-400"></span>
+    </div>
+    <div class="flex items-center gap-2 opt-qty-wrap">
+      <label class="text-[11px] text-mist-300 shrink-0">ຈຳນວນສະຕັອກ</label>
+      <input type="number" min="0" placeholder="ເວັ້ນວ່າງ = ບໍ່ຈຳກັດ" class="opt-qty w-36 bg-ink-900 border border-ink-600 rounded-lg px-3 py-2 text-mist-100 text-sm" value="${qty!=null&&qty!==''?qty:''}">
+      <span class="text-[10px] text-mist-400">ໃສ່ 0 = ຊື້ບໍ່ໄດ້ (ຖ້າໃສ່ລະຫັດຂ້າງລຸ່ມ ຈະນັບຈາກລະຫັດແທນ)</span>
     </div>
     <div class="opt-codes space-y-2"></div>
     <button type="button" class="opt-add-code text-xs text-plasma-400 hover:underline"><i class="fa-solid fa-plus mr-1"></i>ເພີ່ມສະຕັອກ (ເພີ່ມລະຫັດ)</button>`;
@@ -2918,8 +2955,16 @@ document.getElementById('pfImagesFile')?.addEventListener('change', async functi
   if(!files.length) return;
   for(const file of files){
     try{
-      const dataUrl = await compressImageFile(file, 1280, 0.86, 140*1024);
+      const dataUrl = await compressImageFile(file, 1000, 0.82, 100*1024);   // ຮູບນ້ອຍ (ກາດສິນຄ້າ / ສຳຮອງ)
       _pfImages.push(dataUrl);
+      // ຮູບຄວາມຄົມສູງ: ເກັບແຍກຕ່າງຫາກ ບໍ່ຕິດຂີດຈຳກັດ 1MB ຂອງລາຍການສິນຄ້າ → ລູກຄ້າເຫັນຊັດ
+      try{
+        const hi = await compressImageFile(file, 1800, 0.92, 560*1024);
+        const hid = uid('pimg');
+        if(!fbAuth.currentUser){ try{ await ensureAdminSession(); }catch(_e){} }
+        await fbDb.collection(CLOUD_COLLECTION).doc('pimg_'+hid).set({ data: hi, at: nowISO() });
+        _pfHi[dataUrl] = hid;
+      }catch(he){ console.warn('hi-res upload failed', he); toastErr('ອັບໂຫຼດຮູບຄວາມຄົມສູງບໍ່ສຳເລັດ — ຈະໃຊ້ຮູບບີບອັດແທນ'); }
     }catch(err){ console.warn(err); toastErr('ບໍ່ສາມາດອ່ານຮູບນີ້ໄດ້ (ລອງຮູບ JPG/PNG)'); }
   }
   renderPfImagesPreview();
@@ -2929,7 +2974,7 @@ function openProductForm(id){
   _pfSnapshot = {};
   const catSel = document.getElementById('pfCategory');
   catSel.innerHTML = getCategories().map(c=>`<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}</option>`).join('');
-  _pfImages = [];
+  _pfImages = []; _pfHi = {};
   document.getElementById('pfVideoUrl').value = '';
   document.getElementById('pfOptionsList').innerHTML = '';
   if(id){
@@ -2946,11 +2991,11 @@ function openProductForm(id){
     document.getElementById('pfRarity').value=p.rarity;
     document.getElementById('pfStatus').value=p.status;
     document.getElementById('pfStock').value = (p.stock===undefined||p.stock===null) ? '' : p.stock;
-    _pfImages = [...(p.images||[])];
+    _pfImages = [...(p.images||[])]; _pfHi = {}; (p.images||[]).forEach((im,i)=>{ if((p.hiImages||[])[i]) _pfHi[im] = p.hiImages[i]; });
     document.getElementById('pfVideoUrl').value = p.videoUrl || '';
     document.getElementById('pfDesc').value=p.description;
     document.getElementById('pfDeliveryCode').value=p.deliveryCode||'';
-    _pfSnapshot = {}; (p.options||[]).forEach(o=>{ const cs = o.pool ? (o.codes||[]) : (o.deliveryCode?[o.deliveryCode]:[]); _pfSnapshot[o.label] = [...cs]; addOptionRow(o.label, o.price, cs); });
+    _pfSnapshot = {}; _pfQtySnap = {}; (p.options||[]).forEach(o=>{ const cs = o.pool ? (o.codes||[]) : (o.deliveryCode?[o.deliveryCode]:[]); _pfSnapshot[o.label] = [...cs]; _pfQtySnap[o.label] = o.pool ? null : (o.qty==null?null:o.qty); addOptionRow(o.label, o.price, cs, o.pool ? null : o.qty); });
   } else {
     document.getElementById('pfTitle').textContent='ເພີ່ມສິນຄ້າ';
     ['pfId','pfName','pfPrice','pfDiscount','pfStock','pfDesc','pfDeliveryCode'].forEach(id2=>document.getElementById(id2).value='');
@@ -2974,6 +3019,7 @@ async function saveProduct(){
   const stockRaw = document.getElementById('pfStock').value;
   const stock = stockRaw===''? null : Math.max(0, parseInt(stockRaw)||0);
   const images = _pfImages.length? [..._pfImages] : [localAvatar(name)];
+  const hiImages = _pfImages.length ? _pfImages.map(s=>_pfHi[s]||null) : [];
   const videoUrl = document.getElementById('pfVideoUrl').value.trim() || null;
   const description = document.getElementById('pfDesc').value.trim();
   const deliveryCode = document.getElementById('pfDeliveryCode').value.trim();
@@ -2989,8 +3035,14 @@ async function saveProduct(){
       const gone = (_pfSnapshot[label]||[]).filter(c=>!(prev.codes||[]).includes(c));
       codes = codes.filter(c=>!gone.includes(c));
     }
-    const pool = codes.length>0 || !!(prev && prev.pool);
-    if(label && optPrice>0) options.push({ id: prev?prev.id:uid('opt'), label, price: optPrice, pool, codes, deliveryCode: codes[0]||'' });
+    const qtyRaw = (row.querySelector('.opt-qty')||{value:''}).value.trim();
+    let qty = qtyRaw==='' ? null : Math.max(0, parseInt(qtyRaw)||0);
+    // ລູກຄ້າຊື້ລະຫວ່າງທີ່ຟອມເປີດຢູ່: ຖ້າແອັດມິນບໍ່ໄດ້ແກ້ຕົວເລກ → ໃຊ້ຕົວເລກຫຼ້າສຸດຈາກຖານຂໍ້ມູນ
+    if(prev && !prev.pool && qty!==null && qty===_pfQtySnap[label] && prev.qty!=null) qty = prev.qty;
+    let pool = codes.length>0 || !!(prev && prev.pool);
+    if(codes.length<=1 && qty!==null) pool = false;     // ຕັ້ງຈຳນວນເອງ (ບໍ່ມີລະຫັດ ຫຼື ມີລະຫັດດຽວສົ່ງມອບ)
+    if(pool) qty = null;
+    if(label && optPrice>0) options.push({ id: prev?prev.id:uid('opt'), label, price: optPrice, pool, codes, qty, deliveryCode: codes[0]||'' });
   });
   if(!name) return toastErr('ກະລຸນາປ້ອນຊື່ສິນຄ້າ');
   if(!options.length && !price) return toastErr('ກະລຸນາປ້ອນລາຄາ ຫຼື ເພີ່ມຕົວເລືອກລາຄາຢ່າງໜ້ອຍ 1 ລາຍການ');
@@ -2999,15 +3051,15 @@ async function saveProduct(){
   let saved;
   if(id){
     const idx = products.findIndex(p=>p.id===id);
-    products[idx] = {...products[idx], name,category,price,rarity,status,images,videoUrl,description,deliveryCode,stock,options,discount,discountType};
+    products[idx] = {...products[idx], name,category,price,rarity,status,images,hiImages,videoUrl,description,deliveryCode,stock,options,discount,discountType};
     saved = products[idx];
   } else {
-    saved = { id:uid('prd'), name,category,price,rarity,status,images,videoUrl,description,deliveryCode,stock,options,discount,discountType, date: nowISO(), featured:false };
+    saved = { id:uid('prd'), name,category,price,rarity,status,images,hiImages,videoUrl,description,deliveryCode,stock,options,discount,discountType, date: nowISO(), featured:false };
     products.unshift(saved);
   }
   // all options use code-stock -> product stock = total codes left
   if(optAllPool(saved)){
-    const t = saved.options.reduce((n,o)=>n+o.codes.length,0);
+    const t = saved.options.reduce((n,o)=>n+optLeft(o),0);
     saved.stock = t;
     if(t<=0 && saved.status==='available') saved.status='sold';
     if(t>0 && saved.status==='sold') saved.status='available';
@@ -3025,6 +3077,8 @@ async function saveProduct(){
 function deleteProduct(id){
   Swal.fire({ title:'ລຶບສິນຄ້ານີ້?', icon:'warning', showCancelButton:true, confirmButtonColor:'#EF4444', cancelButtonColor:'#16358c', confirmButtonText:'ລຶບ', cancelButtonText:'ຍົກເລີກ', background:'#070f29', color:'#e6ebf9' }).then(r=>{
     if(r.isConfirmed){
+      const _old = loadDB(DB_KEYS.products,[]).find(p=>p.id===id);
+      ((_old&&_old.hiImages)||[]).filter(Boolean).forEach(h=>{ try{ fbDb.collection(CLOUD_COLLECTION).doc('pimg_'+h).delete().catch(()=>{}); }catch(_){} });
       let products = loadDB(DB_KEYS.products,[]).filter(p=>p.id!==id);
       saveDB(DB_KEYS.products, products);
       renderAdminProducts();
@@ -3756,95 +3810,49 @@ function agentClearBanner(){
 </script>
 <!-- ===== PXR WAVE TRANSITION + TAP POP (added) ===== -->
 <style id="pxrWaveCss">
-#pxrWave{position:fixed;inset:0;z-index:100000;pointer-events:none;visibility:hidden;overflow:hidden;-webkit-tap-highlight-color:transparent}
-#pxrWave.on{visibility:visible;pointer-events:auto}
-#pxrWave svg{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
-@keyframes pxrPop{0%{transform:scale(1)}26%{transform:scale(.8)}58%{transform:scale(1.14)}78%{transform:scale(.965)}100%{transform:scale(1)}}
-@keyframes pxrRing{0%{box-shadow:0 0 0 0 rgba(96,124,255,.8)}100%{box-shadow:0 0 0 22px rgba(96,124,255,0)}}
-.pxr-pop{animation:pxrPop .52s cubic-bezier(.2,.9,.3,1.3),pxrRing .52s ease-out !important}
+#pxrWave{position:fixed;top:0;bottom:0;left:-90px;width:calc(100vw + 180px);z-index:100000;pointer-events:none;transform:translate3d(-110%,0,0);will-change:transform;display:none;-webkit-tap-highlight-color:transparent}
+#pxrWave.on{display:block;pointer-events:auto}
+#pxrWave .w{position:absolute;left:80px;right:80px;top:0;bottom:0;background:linear-gradient(90deg,#d9dcff 0%,#8f9bff 25%,#4c5cff 55%,#3b49f0 100%);overflow:hidden}
+#pxrWave svg{position:absolute;top:0;height:100%;width:91px;display:block}
+#pxrWave svg.r{right:0;left:auto}#pxrWave svg.l{left:0;transform:scaleX(-1)}
+#pxrWave i{position:absolute;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.9),rgba(255,255,255,.15) 60%,transparent 70%)}
+/* gentle press: no overshoot, no ring, no vibration -> nothing shakes */
+@keyframes pxrPop{0%{transform:scale(1)}40%{transform:scale(.965)}100%{transform:scale(1)}}
+.pxr-pop{animation:pxrPop .28s cubic-bezier(.3,.7,.3,1) !important}
 @media (prefers-reduced-motion:reduce){#pxrWave{display:none!important}.pxr-pop{animation:none!important}}
 </style>
 <script id="pxrWaveJs">
 (function(){
   if(window.pxrWave) return;
-  var NS='http://www.w3.org/2000/svg', root, svg, W=0, H=0, busy=false;
-  var clipP, edgeA, edgeB, rBase, rStreak, gBase, gStreak, bubG, bub=[];
-  function el(n,a,p){ var e=document.createElementNS(NS,n); for(var k in a){ e.setAttribute(k,a[k]); } if(p) p.appendChild(e); return e; }
-  function stops(g,arr){ arr.forEach(function(s){ el('stop',{offset:s[0],'stop-color':s[1],'stop-opacity':s[2]==null?1:s[2]},g); }); }
-  function build(){
-    root=document.createElement('div'); root.id='pxrWave'; root.setAttribute('aria-hidden','true');
-    svg=el('svg',{preserveAspectRatio:'none'},root);
-    var defs=el('defs',{},svg);
-    gBase=el('linearGradient',{id:'pwG',gradientUnits:'userSpaceOnUse',x1:0,y1:0,x2:100,y2:40},defs);
-    stops(gBase,[[0,'#e3e5ff'],[.36,'#aab1ff'],[.7,'#6a79ff'],[1,'#4558ff']]);
-    gStreak=el('linearGradient',{id:'pwS',gradientUnits:'userSpaceOnUse',x1:0,y1:0,x2:100,y2:0},defs);
-    stops(gStreak,[[0,'#fff',0],[.12,'#fff',.5],[.27,'#fff',0],[.45,'#fff',.32],[.57,'#fff',0],[.76,'#fff',.42],[.92,'#fff',.08],[1,'#fff',0]]);
-    var bg=el('radialGradient',{id:'pwB',cx:'35%',cy:'30%',r:'70%'},defs);
-    stops(bg,[[0,'#ffffff',.95],[.38,'#dfe3ff',.55],[1,'#6f7dff',.28]]);
-    var cp=el('clipPath',{id:'pwClip'},defs); clipP=el('path',{},cp);
-    var g=el('g',{'clip-path':'url(#pwClip)'},svg);
-    rBase=el('rect',{x:0,y:0,fill:'url(#pwG)'},g);
-    rStreak=el('rect',{x:0,y:0,fill:'url(#pwS)',opacity:.6},g);
-    bubG=el('g',{},g);
-    edgeA=el('path',{fill:'none',stroke:'rgba(255,255,255,.3)','stroke-width':18,'stroke-linecap':'round','stroke-linejoin':'round',transform:'translate(9 0)'},svg);
-    edgeB=el('path',{fill:'none',stroke:'rgba(255,255,255,.96)','stroke-width':3.2,'stroke-linecap':'round','stroke-linejoin':'round'},svg);
-    document.body.appendChild(root);
+  var wave=null, busy=false;
+  function mkWave(){
+    if(wave) return wave;
+    wave=document.createElement('div'); wave.id='pxrWave'; wave.setAttribute('aria-hidden','true');
+    var path='M0 0L0 100 40 100C72 86 8 70 42 54 76 38 10 24 44 8 52 4 48 2 44 0Z';
+    var bub=[[12,8,16],[40,30,10],[22,62,20],[60,78,12],[75,20,14],[50,50,8]].map(function(b){ return '<i style="left:'+b[0]+'%;top:'+b[1]+'%;width:'+b[2]+'px;height:'+b[2]+'px"></i>'; }).join('');
+    wave.innerHTML='<svg class="l" viewBox="0 0 91 100" preserveAspectRatio="none"><path d="'+path+'" fill="#d9dcff"/></svg><div class="w">'+bub+'</div><svg class="r" viewBox="0 0 91 100" preserveAspectRatio="none"><path d="'+path+'" fill="#3b49f0"/></svg>';
+    document.body.appendChild(wave); return wave;
   }
-  function size(){
-    W=window.innerWidth||document.documentElement.clientWidth; H=window.innerHeight||document.documentElement.clientHeight;
-    svg.setAttribute('viewBox','0 0 '+W+' '+H);
-    [rBase,rStreak].forEach(function(r){ r.setAttribute('width',W); r.setAttribute('height',H); });
-    gBase.setAttribute('x2',W); gBase.setAttribute('y2',H*.18);
-    gStreak.setAttribute('x2',W);
-  }
-  function mkBubbles(){
-    bubG.innerHTML=''; bub=[];
-    var n=W<600?9:18;
-    for(var i=0;i<n;i++){
-      var r=3+Math.random()*Math.random()*21;
-      var c=el('circle',{r:r,fill:'url(#pwB)',stroke:'rgba(255,255,255,.8)','stroke-width':1.2},bubG);
-      bub.push({c:c,x:Math.random()*W,y:Math.random()*H,sp:8+Math.random()*18,ph:Math.random()*6.28});
-    }
-  }
-  function draw(e,t){
-    var A=Math.min(46,W*.11), n=Math.max(26,Math.ceil(H/14)), d='', i, y, x;
-    for(i=0;i<=n;i++){
-      y=i*H/n;
-      x=e + A*Math.sin(y/H*9.4+t*5.6) + A*.32*Math.sin(y/H*21-t*3.4);
-      d+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1);
-    }
-    edgeA.setAttribute('d',d); edgeB.setAttribute('d',d);
-    clipP.setAttribute('d',d+'L0 '+H+'L0 0Z');
-    for(i=0;i<bub.length;i++){
-      var b=bub[i], cy=((b.y-t*b.sp)%H+H)%H;
-      b.c.setAttribute('cx',(b.x+Math.sin(t*1.6+b.ph)*6).toFixed(1)); b.c.setAttribute('cy',cy.toFixed(1));
-    }
-  }
-  function ease(p){ return p<.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2; }
-  /* pxrWave(cb): blue wave sweeps left→right covering the screen, cb() runs while covered, wave retreats to the left.
-     returns true if started, false if ignored (already running). */
+  /* pxrWave(cb): smooth transform-only wave (GPU), cb() runs while the screen is covered.
+     returns true if cb is handled (will run / already ran), false if ignored because a wave is already running. */
   window.pxrWave=function(cb){
-    if(busy) return false;
     var reduce=false; try{ reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(_){}
-    if(reduce||document.hidden){ try{ cb&&cb(); }catch(x){ console.error(x); } return true; }
-    busy=true;
-    if(!root) build();
-    size(); mkBubbles();
-    var A=Math.min(46,W*.11), e0=-A-44, e1=W+A+44, T1=520, TH=170, T2=560, t0=performance.now(), called=false;
+    var called=false;
     function run(){ if(called) return; called=true; try{ cb&&cb(); }catch(x){ console.error(x); } }
-    root.classList.add('on');
-    (function step(now){
-      var t=now-t0, e;
-      if(t<T1){ e=e0+(e1-e0)*ease(t/T1); }
-      else {
-        run();
-        if(t<T1+TH){ e=e1; }
-        else if(t<T1+TH+T2){ e=e1-(e1-e0)*ease((t-T1-TH)/T2); }
-        else { root.classList.remove('on'); busy=false; return; }
-      }
-      draw(e,t/1000);
-      requestAnimationFrame(step);
-    })(t0);
+    if(busy) return false;
+    if(reduce||document.hidden||!Element.prototype.animate){ run(); return true; }
+    busy=true;
+    var el=mkWave(); el.classList.add('on');
+    var guard=setTimeout(function(){ if(busy){ try{ el.getAnimations().forEach(function(x){ x.cancel(); }); }catch(e){} el.classList.remove('on'); busy=false; run(); } },1800);
+    var ease='cubic-bezier(.65,0,.35,1)';
+    el.animate([{transform:'translate3d(-110%,0,0)'},{transform:'translate3d(0,0,0)'}],{duration:200,easing:ease,fill:'forwards'}).finished.then(function(){
+      var root=document.documentElement, old=root.style.scrollBehavior; root.style.scrollBehavior='auto';
+      run();
+      root.style.scrollBehavior=old;
+      setTimeout(function(){
+        el.animate([{transform:'translate3d(0,0,0)'},{transform:'translate3d(110%,0,0)'}],{duration:250,easing:ease,fill:'forwards'}).finished.then(function(){ clearTimeout(guard); el.classList.remove('on'); busy=false; });
+      },50);
+    }).catch(function(){ clearTimeout(guard); busy=false; el.classList.remove('on'); run(); });
     return true;
   };
   /* tap "pop": every tappable control bounces like the clip */
@@ -3862,7 +3870,6 @@ function agentClearBanner(){
     var t=ev.target; if(!t||!t.closest) return;
     var b=popTarget(t); if(!b) return;
     b.classList.remove('pxr-pop'); void b.offsetWidth; b.classList.add('pxr-pop');
-    try{ if(navigator.vibrate) navigator.vibrate(8); }catch(_){}
   },{passive:true});
   document.addEventListener('animationend',function(ev){
     var t=ev.target; if(t&&t.classList&&t.classList.contains('pxr-pop')&&ev.animationName==='pxrPop') t.classList.remove('pxr-pop');
